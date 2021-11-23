@@ -41,56 +41,6 @@ class cleanCookiesAndHeadersByRow():
                 headers[key] = str(val).strip()
         return headers
 
-"""
-:param  articleItem  Pipeline的Item
-"""
-class cleanArticleItem():
-    def __init__(self, artivleItem):
-        self.articleItem = artivleItem
-        self.setCleanedArticleItem()
-
-    def setCleanedArticleItem(self):
-        temp = self.cleanArticleItem()
-        self.cleaned_articleItem = temp
-        return None
-
-    def getCleanedArticleItem(self):
-        return self.cleaned_articleItem
-
-    def cleanFuncBasic(self, s):
-        if(re.search(':',str(s)) or re.search('：',str(s))):
-            sList = str(s).split("：") or str(s).split(":")
-            result = "".join(sList[1].strip())
-            return result
-        else:
-            print("传入的字符串没有冒号，不能分离")
-            return None
-    def translateTime(self, s):
-        return datetime.datetime.strptime(str(s), "%Y-%m-%d %H:%M:%S")
-
-    def cleanContent(self, lis):
-        for item in lis:
-            item = item.replace('\u3000','')
-        strContent = "".join(lis).replace('\'','\"')
-        return strContent
-    # 返回图片名，无.jpg
-    def cleanImgSrc2Name(self, s):
-        return str(str(s).split('/')[-1]).split('.')[0]
-
-    def cleanArticleItem(self):
-        temp = {}
-        temp['articleTitle'] = self.articleItem['articleTitle']
-        temp['articleAbstract'] = self.articleItem['articleAbstract']
-        temp['articleFrom'] = self.cleanFuncBasic(self.articleItem['articleFrom'])
-        temp['articleAuthor'] = self.cleanFuncBasic(self.articleItem['articleAuthor'])
-        temp['articleTime'] = self.translateTime(self.cleanFuncBasic(self.articleItem['articleTime']))
-        temp['articleContent'] = self.cleanContent(self.articleItem['articleContent'])
-        temp['articleImgSrc'] = self.articleItem['articleImgSrc']
-        # 从图片路径提取图片名
-        temp['articleImgName'] = self.cleanImgSrc2Name(self.articleItem['articleImgSrc'])
-        return temp
-
-
 # --------------------------- 爬取今日头条财经目录下所有图片的类 ----------------------------------
 '''
     使用框架 selenium
@@ -224,15 +174,16 @@ class articleUrl_toutiao():
 
     def get_cookiesAndSignature(self):
         option = webdriver.ChromeOptions()
-        option.add_experimental_option('excludeSwitches', ['enable-automation'])
-        option.add_experimental_option('useAutomationExtension', False)
+        # option.add_experimental_option('excludeSwitches', ['enable-automation'])
+        # option.add_experimental_option('useAutomationExtension', False)
+
         browser = webdriver.Chrome(executable_path="E:\Projects\webDriver\\chrome\\chromedriver.exe", options=option)
         start_urls = "https://www.toutiao.com/"
         # 2.通过浏览器向服务器发送URL请求
         # browser.get("http://httpbin.org/ip")    # 查看本机ip，看代理是否起作用
 
         browser.get(start_urls)
-        time.sleep(2)  # 等待
+        time.sleep(10)  # 等待
         # xhr重写
         js = """(function() {
                 var proxied = window.XMLHttpRequest.prototype.open;
@@ -251,26 +202,42 @@ class articleUrl_toutiao():
                     }
                 };
             })();"""
-        browser.execute_script(js)
-
+        # browser.execute_script(js)
         # 定位
-        caijing = browser.find_element_by_xpath("//div[@class='left-container']//ul[@class='feed-default-nav']/li[4]")
-        time.sleep(2)
-        caijing.click()
+        # caijing = browser.find_element_by_xpath("//div[@class='fix-header common-component-wrapper']//div[@class='feed-m-nav']/ul[@class='feed-default-nav']//li[@role='button'][4]")
+        # time.sleep(2)
+        # caijing.click()
+        js2 = '''
+                i = "https://www.toutiao.comhttps://tsearch.snssdk.com/search/suggest/hot_words/";
+				n = window.byted_acrawler
+				signature = n.sign(n,i) 
+				
+				let root = document.getElementById("root");
+                let urlLinkNode = document.createElement("div");
+                urlLinkNode.setAttribute("id", "urlLinkNode");
+                urlLinkNode.innerHTML = signature
+                root.appendChild(urlLinkNode);
+        '''
+        browser.execute_script(js2)
+        time.sleep(5)
+        browser.execute_script(js2)
+
 
         # 获取最新signature
         signatureApi = browser.find_element_by_id("urlLinkNode").text
-        signature = str(signatureApi).split("signature=")[1]
-        refresh_count = str(signatureApi).split("refresh_count=")[1].split("&")[0]
+        print(signatureApi)
+        signature = signatureApi
+        # signature = str(signatureApi).split("signature=")[1]
+        # refresh_count = str(signatureApi).split("refresh_count=")[1].split("&")[0]
         # 获取cookie
         dictCookies = browser.get_cookies()
         cookies = {}
         for item in dictCookies:
             key = item['name']
             cookies[str(key)] = str(item['value'])
-        browser.close()
+        # browser.close()
         return {
-            "refresh_count":refresh_count,
+            # "refresh_count":refresh_count,
             "cookies":cookies,
             "signature":signature
         }
@@ -278,61 +245,7 @@ class articleUrl_toutiao():
     def open(self):
         pass
 
-'''
-    使用框架 selenium
-    已有url，下载url下的图片
-'''
-class ImgsDownloadByUrl():
-    def __init__(self):
-        self.conn = pymysql.connect(
-            host='localhost',
-            user="root",
-            passwd="root",
-            db="articledatabase",
-            autocommit=True
-        )
-        self.cursor = self.conn.cursor()
-        self.gerUrlFromMysql()
 
-    def gerUrlFromMysql(self):
-        sql = "SELECT * FROM `articledatabase`.`tb_imgstoutiaocaijing`;"
-        self.cursor.execute(sql)
-        urlList = self.cursor.fetchall()
-        self.urlList = urlList
-        self.closeMysql()
-        return urlList
-
-    # def download(self):
-    #     option = webdriver.ChromeOptions()
-    #     option.add_experimental_option('excludeSwitches', ['enable-automation'])
-    #     option.add_experimental_option('useAutomationExtension', False)
-    #     browser = webdriver.Chrome(executable_path="E:\Projects\webDriver\\chrome\\chromedriver.exe", options=option)
-    #     self.urlList = self.urlList[5781:]
-    #     # 2.通过浏览器向服务器发送URL请求
-    #     for item in self.urlList:
-    #         browser.get(item[1])
-    #         time.sleep(0.5)  # 等待
-    #         # 定位
-    #         img = browser.find_element_by_xpath("//img")
-    #         actions = ActionChains(browser)
-    #         # 找到图片后右键单击图片
-    #         actions.move_to_element(img)  # 定位到元素
-    #         pyautogui.hotkey("ctrl", "s")
-    #         time.sleep(0.5)  # 等待一秒
-    #         # 输入视频名字
-    #         pyautogui.typewrite(str(item[0]) + '.jpg')
-    #         pyautogui.hotkey('enter')
-    #         sleep(1)
-    #     browser.close()
-
-    def file_path(self, request, response=None, info=None, *, item=None):
-        # 提取图片名
-        imgName = str(str(request.url).split('/')[-1]).split('?')[0]
-        return f'toutiaoImgs/{imgName}.jpg'
-
-    def closeMysql(self):
-        self.cursor.close()
-        self.conn.close()
 
 
 # --------------------------- 随机时间休眠 ----------------------------------
@@ -342,26 +255,6 @@ def randomSleep():
     time.sleep(sleepTime)
     pass
 
-# --------------------------- 东方财富 cookie 和 signature 自动获取 -----------
-class ArticleTool_DongFangCaiFu():
-    def get_cookies_auto(self):
-        option = webdriver.ChromeOptions()
-        option.add_experimental_option('excludeSwitches', ['enable-automation'])
-        option.add_experimental_option('useAutomationExtension', False)
-        browser = webdriver.Chrome(executable_path="E:\Projects\webDriver\\chrome\\chromedriver.exe", options=option)
-        start_urls = "https://www.eastmoney.com/"
-        # 2.通过浏览器向服务器发送URL请求
-        # browser.get("http://httpbin.org/ip")    # 查看本机ip，看代理是否起作用
-        browser.get(start_urls)
-        time.sleep(1)  # 等待
-        # 获取cookie
-        dictCookies = browser.get_cookies()
-        cookies = {}
-        for item in dictCookies:
-            key = item['name']
-            cookies[str(key)] = str(item['value'])
-        browser.close()
-        return cookies
 
 # 已有图片链接下载图片的方法
 def downimg(urlpath, imgname, dstDirPath):
@@ -372,70 +265,7 @@ def downimg(urlpath, imgname, dstDirPath):
         f.write(img)
 
 
-# 图片重命名
-def reName(imgSrc, imgDst):
-    os.rename(imgSrc, imgDst)
 
 
 
-# 获取accessToken的方法
-def getAccessToken(AK, SK):
-    # client_id 为官网获取的AK， client_secret 为官网获取的SK
-    host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={}&client_secret={}'.format(AK, SK)
-    response = requests.get(host)
-    if response:
-        return response.json()['access_token']
 
-
-
-# # 修改单张图片的md5
-# def changeMD5(imgSrc):
-#     with open(imgSrc, 'rb') as f:
-#         md5 = hashlib.md5(f.read()).hexdigest()
-#     file = open(imgSrc, 'rb').read()
-#     with open(imgSrc, 'wb') as new_file:
-#         new_file.write(file + bytes('\0', encoding='utf-8'))  # here we are adding a null to change the file content
-#         newMD5 = hashlib.md5(open(imgSrc, 'rb').read()).hexdigest()
-#     print("修改MD5的文件：", imgSrc,"\n旧MD5: ", md5, " \t 新MD5： ",newMD5)
-#
-# # 批量修改目录下图片的MD5
-# def changeMD54Imgs(dirPath):
-#     imgNameList = os.listdir(dirPath)
-#     for imgName in imgNameList:
-#         imgSrc = dirPath + '\\' + imgName
-#         changeMD5(imgSrc)
-
-
-# 复制文件
-def copyFile(src, dst):
-    shutil.copyfile(src, dst)
-
-
-def checkIfAllNumber(str):
-    # 验证字符串是否全部为数字
-    p = re.compile('^[0-9]*$')
-    result = p.match(str)
-    if(result):
-        # 说明全部位数字，返回1
-        return 1
-    else:
-        return 0
-
-# 判断目录是否存在，不存在则创建
-def checkACreateDir(dirPath):
-    exist = os.path.exists(dirPath)
-    if(not exist):
-        os.makedirs(dirPath)
-    else:
-        pass
-    pass
-
-# 获取当前日期
-def getCurDate():
-    return time.strftime("%Y%m%d", time.localtime())
-
-# 获取当前图片下载的目录路径 oriDomain为带爬取的网站的名字，方便分类
-# def getImsgDownloadDirPath(oriDomain='toutiao'):
-#     proj_absPath = globalTools.getCurOriPath()
-#     updateTime = getCurDate()
-#     return proj_absPath + '\\assets\imgsCrawled\\' + updateTime + '\\' + oriDomain + '\\'

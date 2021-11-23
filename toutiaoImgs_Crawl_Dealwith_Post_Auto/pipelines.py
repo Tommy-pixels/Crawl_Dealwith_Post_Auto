@@ -7,7 +7,7 @@ class ToutiaoArticleInfoPipeline:
         host='localhost',
         user="root",
         passwd="root",
-        db="toutiaodatabase",
+        db="imgsdatabase",
         autocommit=True
     )
     cursor = conn.cursor()
@@ -34,7 +34,6 @@ class ToutiaoArticleInfoPipeline:
                 user_id,
                 user_avatarUrl
             )
-            print()
             # 执行Sql语句
             try:
                 result = self.cursor.execute(sql)
@@ -42,10 +41,11 @@ class ToutiaoArticleInfoPipeline:
                     print("插入头条文章信息记录成功： ", item)
                     pass
             except Exception as e:
-                print("----------------------------------------")
                 print("插入头条文章信息记录失败： ", sql)
-        else:
-            return item
+        elif(spider.name == 'toutiaoImgsSpider'):
+            pass
+
+        return item
 
     def close_spider(self, spider):
         # 关闭数据库
@@ -57,11 +57,3 @@ class ToutiaoArticleInfoPipeline:
         except Exception as e:
             print("关闭数据库连接失败")
 
-
-
-class ToutiaoImgsDownloadPipeline:
-    def process_item(self, item, spider):
-        if(spider.name == 'toutiaoImgsSpider'):
-            dstDirPath = basic.getImsgDownloadDirPath()
-            basic.downimg(urlpath=item["imgUrl"], imgname=item["imgName"], dstDirPath=dstDirPath)
-            pass

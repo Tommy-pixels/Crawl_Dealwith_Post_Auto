@@ -12,11 +12,11 @@ def getArticleUrlFromMysql():
         host='localhost',
         user="root",
         passwd="root",
-        db="articledatabase",
+        db="imgsdatabase",
         autocommit=True
     )
     cursor = conn.cursor()
-    sql = "SELECT * FROM `toutiaodatabase`.`tb_articlestoutiaocaijing`;"
+    sql = "SELECT * FROM `imgsdatabase`.`tb_toutiao_test`;"
     cursor.execute(sql)
     result = cursor.fetchall()
     for item in result:
@@ -63,7 +63,7 @@ class toutiaoSpider(scrapy.Spider):
         host='localhost',
         user="root",
         passwd="root",
-        db="articledatabase",
+        db="imgsdatabase",
         autocommit=True
     )
     cursor = conn.cursor()
@@ -115,7 +115,7 @@ class toutiaoSpider(scrapy.Spider):
                 print("处理的urlList如下：")
                 print(imgUrlList)
                 for url in imgUrlList:
-                    sql = "INSERT INTO `toutiaodatabase`.`tb_imgstoutiaocaijing2` (`imgUrl`, `originUrl`) VALUES (\'{}\', \'{}\');".format(url, response.url)
+                    sql = "INSERT INTO `imgsdatabase`.`tb_toutiao_test` (`imgUrl`, `originUrl`) VALUES (\'{}\', \'{}\');".format(url, response.url)
                     result = self.cursor.execute(sql)
                     if (result == 1):
                         print("插入图片url成功:  ", url)
@@ -125,17 +125,17 @@ class toutiaoSpider(scrapy.Spider):
                     toutiaoImg = items.toutiaoImgItem()
                     toutiaoImg["imgUrl"] = url
                     # 从数据库获取id 用于下载图片的时候命名
-                    sqlGetId = "Select `id` From `toutiaodatabase`.`tb_imgstoutiaocaijing` where `imgUrl` = \'{}\'".format(url)
+                    sqlGetId = "Select `id` From `imgsdatabase`.`tb_toutiao_test` where `imgUrl` = \'{}\'".format(url)
                     self.cursor.execute(sqlGetId)
                     id = self.cursor.fetchone()
                     toutiaoImg["imgName"] = id[0]
                     yield toutiaoImg
             else:
-                sql = "INSERT INTO `toutiaodatabase`.`tb_imgstoutiaocaijing2` (`imgUrl`, `originUrl`) VALUES (\'{}\', \'{}\');".format(
+                sql = "INSERT INTO `imgsdatabase`.`tb_toutiao_test` (`imgUrl`, `originUrl`) VALUES (\'{}\', \'{}\');".format(
                     '该链接找不到图片', response.url)
                 self.cursor.execute(sql)
         else:
-            sql = "INSERT INTO `toutiaodatabase`.`tb_imgstoutiaocaijing2` (`imgUrl`, `originUrl`) VALUES (\'{}\', \'{}\');".format(
+            sql = "INSERT INTO `imgsdatabase`.`tb_toutiao_test` (`imgUrl`, `originUrl`) VALUES (\'{}\', \'{}\');".format(
                 str(response.status), response.url)
             self.cursor.execute(sql)
             print("---------------------------------------------------------------------")
