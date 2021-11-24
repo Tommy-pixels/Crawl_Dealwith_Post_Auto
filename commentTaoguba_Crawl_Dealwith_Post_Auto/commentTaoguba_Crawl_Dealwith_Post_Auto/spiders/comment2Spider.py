@@ -61,8 +61,8 @@ class quote1Spider(scrapy.Spider):
             if(theNewestSecond!=''):
                 if(int(publishTime)<int(theNewestSecond) and int(publishTime)>curDateSecond):
                     continue
-            elif('#' in content or '$' in content or '@' in content):
-                continue
+                elif('#' in content or '$' in content or '@' in content):
+                    continue
             commentItem['comment'] = content
             commentItem['publishTime'] = publishTime
             yield commentItem
