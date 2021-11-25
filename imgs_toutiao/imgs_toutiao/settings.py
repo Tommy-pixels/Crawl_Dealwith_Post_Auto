@@ -1,4 +1,4 @@
-# Scrapy settings for toutiaoImgs_Crawl_Dealwith_Post_Auto project
+# Scrapy settings for imgs_toutiao project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,22 +7,18 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'toutiaoImgs_Crawl_Dealwith_Post_Auto'
+BOT_NAME = 'imgs_toutiao'
 
-SPIDER_MODULES = ['spiders']
-NEWSPIDER_MODULE = 'spiders'
+SPIDER_MODULES = ['imgs_toutiao.spiders']
+NEWSPIDER_MODULE = 'imgs_toutiao.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'toutiaoImgs_Crawl_Dealwith_Post_Auto (+http://www.yourdomain.com)'
+#USER_AGENT = 'imgs_toutiao (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-
-LOG_LEVEL='WARN'
-
-# 强制设置中文模式
-FEED_EXPORT_ENCODING = 'utf-8'
+LOG_LEVEL = 'WARN'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -50,14 +46,15 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'toutiaoImgs_Crawl_Dealwith_Post_Auto.middlewares.ToutiaoimgsCrawlDealwithPostAutoSpiderMiddleware': 543,
+#    'imgs_toutiao.middlewares.ImgsToutiaoSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'toutiaoImgs_Crawl_Dealwith_Post_Auto.middlewares.ToutiaoimgsCrawlDealwithPostAutoDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+   'imgs_toutiao.middlewares.ProxyMiddleware': 543,
+}
+
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -67,10 +64,9 @@ FEED_EXPORT_ENCODING = 'utf-8'
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-   # 'toutiaoImgs_Crawl_Dealwith_Post_Auto.pipelines.ToutiaoArticleInfoPipeline': 300,
-   # 'toutiaoImgs_Crawl_Dealwith_Post_Auto.pipelines.ToutiaoImgsDownloadPipeline': 301
-}
+#ITEM_PIPELINES = {
+#    'imgs_toutiao.pipelines.ImgsToutiaoPipeline': 300,
+#}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

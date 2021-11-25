@@ -1,17 +1,17 @@
 import scrapy, pymysql
-import items
+from .. import items
 import json, time, random
 from fake_useragent import UserAgent
-from tools import basic
+from ..tools import basic
 
 class toutiaoSpider(scrapy.Spider):
-    name = "toutiaoArticleInfoSpider"
+    name = "toutiaoSpider"
     # allowed_domains = ["www.toutiao.com"]
     # ----------------------- 手动获取cookies和signature的方式 -----------------------------------
     # signature = "_02B4Z6wo00901kln9egAAIDB-ZYZIH4SMh5JQ.FAAPNOzVMC8w1TlrAjpWWO0pFQUTkZlrWpkmY8O9.sUKGHxnwVS4rucVAbrsG4q.W6.xwLoT-orRjn8VgBPauK.veP8ROb9ku4YzDnQyzj40"
     # cleaner = basic.cleanCookiesAndHeadersByRow()
     # cookies = cleaner.translateCookies("__ac_signature=_02B4Z6wo00f01BzAvYgAAIDDrDFRQQIuS.gc4LkAAGZcec; ttcid=10b747fe75ea420b8d8957ad04a1b3a921; tt_webid=7018349806059144712; s_v_web_id=verify_kuot5n54_TX4SeoI4_w4hJ_4jFk_90uZ_T3gvqNcLoldZ; csrftoken=bd335ff96f2f9e157094d8ccffb54854; MONITOR_WEB_ID=7018349806059144712; ttwid=1%7CJq2h1aBSC4kUT-kf9dcqoZMMmJ75jz0YRPG97wqPXO0%7C1634089144%7C41bbbb597d14c9388713d1c2f340abd7a140d9965559dce72f0cae622bfd74a9; tt_scid=ZVgesob4VcpKYXsK2Q8Nb3lpLwyn13Nf19jXdjF739dBWtMBWJiKhHQOJZ5m3pmc9773")
-    # # ------------------------- 自动获取cookies和signature的方式
+    # ------------------------- 自动获取cookies和signature的方式
     toutiao = basic.articleUrl_toutiao()
     toutiaocookiesAndSignature = toutiao.get_cookiesAndSignature()
     cookies = toutiaocookiesAndSignature["cookies"]

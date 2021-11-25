@@ -13,6 +13,7 @@ class ToutiaoArticleInfoPipeline:
     cursor = conn.cursor()
 
     def process_item(self, item, spider):
+        print("SSS")
         if(spider.name == 'toutiaoArticleInfoSpider'):
             title = item['title']
             article_url = item['article_url']
