@@ -6,7 +6,7 @@
 import scrapy
 
 
-class CommentItem(scrapy.Item):
-    comment = scrapy.Field()
-    publishTime = scrapy.Field()
-    url = scrapy.Field()
+class ArticlessougouwechatItem(scrapy.Item):
+    # define the fields for your item here like:
+    # name = scrapy.Field()
+    pass

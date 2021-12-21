@@ -110,7 +110,6 @@ class xueqiuSpider(scrapy.Spider):
             yield scrapy.Request(url=replyUrl, cookies=self.cookies, headers=self.header, callback=self.parse_comment_reply)
 
     def parse_comment_reply(self,response):
-        print("reply")
         resJson = json.loads(response.body)
         repliesList = resJson['replies']
         commentItem = CommentItem()
@@ -120,5 +119,4 @@ class xueqiuSpider(scrapy.Spider):
             commentItem['comment'] = reply['text']
             commentItem['publishTime'] = reply['created_at']
             commentItem['fromUrl'] = response.url
-            print(reply['text'])
             yield commentItem

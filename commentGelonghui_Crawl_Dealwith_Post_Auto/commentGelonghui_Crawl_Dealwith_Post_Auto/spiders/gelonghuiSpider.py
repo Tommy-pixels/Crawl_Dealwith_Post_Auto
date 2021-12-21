@@ -100,6 +100,7 @@ class GelonghuiSpider(scrapy.Spider):
                     publishTime = commentInfo['createTimestamp']    # 评论发布时间
                     commentItem['comment'] = comment
                     commentItem['publishTime'] = publishTime
+                    commentItem['url'] = response.url
                     yield commentItem
             else:
                 # 接口获取到的评论数量小于真实评论数量
@@ -119,11 +120,13 @@ class GelonghuiSpider(scrapy.Spider):
     def parse_commentApi(self, response):
         commentList = json.loads(response.text)['result']
         commentItem = items.CommentItem()
+        url = response.url
         if(commentList):
             for comment_ in commentList:
                 comment = comment_['content']
                 publishTime = comment_['createTimestamp']
                 commentItem['comment'] = comment
                 commentItem['publishTime'] = publishTime
+                commentItem['url'] = url
                 yield commentItem
 

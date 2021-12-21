@@ -6,7 +6,8 @@
 import scrapy
 
 
-class CommentItem(scrapy.Item):
-    comment = scrapy.Field()
-    publishTime = scrapy.Field()
-    url = scrapy.Field()
+class ArticleContentItem(scrapy.Item):
+    title = scrapy.Field()
+    content = scrapy.Field()
+
+

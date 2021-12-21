@@ -22,12 +22,14 @@ class CommentgelonghuiPipeline:
     def process_item(self, item, spider):
         comment = item['comment']
         publishTime = item['publishTime']
+        url = item['url']
         yesterdaySeconds = int(getSecondByDate(str(getCurDate()) + ' 00:00:00')) - 172800 # 48h前的时间戳（秒）
         if(int(publishTime)>int(yesterdaySeconds)):
             # 评论的发布时间在两天内则录入数据库
-            sql = "INSERT INTO `commentdatabase`.`tb_comment_gelonghui_content` (`comment`, `publishTime`) VALUES (\'{}\', \'{}\');".format(
+            sql = "INSERT INTO `commentdatabase`.`tb_comment_gelonghui_content` (`comment`, `publishTime`, `url`) VALUES (\'{}\', \'{}\', \'{}\');".format(
                 comment,
-                publishTime
+                publishTime,
+                url
             )
             self.cursor.execute(sql)
         return item

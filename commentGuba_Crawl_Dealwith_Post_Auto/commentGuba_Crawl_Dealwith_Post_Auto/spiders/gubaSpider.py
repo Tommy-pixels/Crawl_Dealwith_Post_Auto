@@ -69,7 +69,7 @@ class GetParams_Selenium:
 class GubaSpider(scrapy.Spider):
     name = 'gubaSpider'
     articleList_url = 'http://guba.eastmoney.com/default,99_{}.html'
-    articleList_page = 7
+    articleList_page = 1
     getDataListApi = 'http://guba.eastmoney.com/interface/GetData.aspx'
     param_path_commentList = 'reply/api/Reply/ArticleNewReplyList'
     param_path_commentReplyList = 'reply/api/Reply/ArticleReplyDetail'
@@ -88,7 +88,7 @@ class GubaSpider(scrapy.Spider):
     def start_requests(self):
         getparamsInstance = GetParams_Selenium()
         self.cookies = getparamsInstance.get_params(url='http://guba.eastmoney.com')['cookies']
-        for i in range(8,12):
+        for i in range(1,12):
             self.headers = translate_Headers_Row2Obj(self.headersRom)
             self.headers['User-Agent'] = str(UserAgent().random)
             if(i%2 == 0):
@@ -106,18 +106,15 @@ class GubaSpider(scrapy.Spider):
         for articleSelector in articleList:
             commentNum = articleSelector.xpath(".//cite")[1].xpath(".//text()").extract_first().strip()
             articleUrl = articleSelector.xpath(".//span//a[@title]/@href").extract_first()
-            print(articleUrl)
             refer = ','.join(articleUrl.split(',')[-2:])
             articleId = articleUrl.split(',')[-1].split('.')[0]
 
             if('/' in articleId):
-                print(articleId)
                 continue
             articleUpdateTime = curYear + articleSelector.xpath(".//cite")[4].xpath(".//text()").extract_first().strip().replace('-','') + ':00'
 
             if(int(commentNum)>0 and int(getSecondByDate(articleUpdateTime)) > checkTime and articleId not in articleIdList):
                 articleIdList.append((refer,articleId))
-        print(articleIdList)
 
         for refer, articleId in articleIdList:
             self.headers['User-Agent'] = str(UserAgent().random)
