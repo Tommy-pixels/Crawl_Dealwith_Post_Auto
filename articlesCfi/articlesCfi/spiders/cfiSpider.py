@@ -61,21 +61,33 @@ class NbdSpider(scrapy.Spider):
                 continue
             # url = 'https://industry.cfi.cn/' + article.xpath("./@href").extract_first()
             url = article.xpath("./@href").extract_first()
+            title = article.xpath("./text()").extract_first()
             if (url not in urlList):
-                urlList.append(url)
+                urlList.append((url, title))
 
         for url in urlList:
-            yield scrapy.Request(url='https://industry.cfi.cn/newspage.aspx?id={}'.format(url.split('.')[0].replace('p', '')), headers=self.headers, cookies=self.cookies, callback=self.parse_content)
+            dic = {}
+            dic['title'] = title
+            yield scrapy.Request(
+                url='https://industry.cfi.cn/newspage.aspx?id={}'.format(url[0].split('.')[0].replace('p', '')),
+                headers=self.headers, cookies=self.cookies,
+                callback=self.parse_content,
+                cb_kwargs=dic
+            )
 
-    def parse_content(self, response):
+    def parse_content(self, response, title):
         articleContentItem = items.ArticleContentItem()
         try:
-            s = response.text.split('var nr{}="'.format(response.url.split('.')[1].split('.')[0]))[1].split('"')[0]
+            # s = response.text.split('var nr{}="'.format(response.url.split('.')[1].split('.')[0]))[1].split('"')[0]
+            s = response.text.split('var nr{}="'.format(response.url.split('.')[-1].split('=')[-1]))[1].split('"')[0]
             executor = execute_jsfile()
             res = executor.call('decode', s)
-            soup = bs4.BeautifulSoup(res)
-            title = soup.h1.text
-            soup.find('img').get('src')
+            soup = bs4.BeautifulSoup(res, features="lxml")
+            try:
+                title_ = soup.h1.text
+            except Exception as e:
+                title_ = title
+                pass
             img_lis = []
             for img in soup.find_all('img'):
                 img_lis.append(img.get('src'))
@@ -92,31 +104,39 @@ class NbdSpider(scrapy.Spider):
                         and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
                         and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c
                 ):
-                    content = content + '<p>' + p.xpath('string(.)').extract_first().replace('\n', '').replace(' ',
-                                                                                                               '') + '</p>'
+                    content = content + '<p>' + c.replace('\n', '').replace(' ','').replace('\u3000', '') + '</p>'
                 if (img_lis != []):
                     content = content + '<img src=\'' + img_lis[0] + '\' />'
                     img_lis.pop(0)
 
-            articleContentItem['title'] = title
+            articleContentItem['title'] = title_
             articleContentItem['content'] = content
             yield articleContentItem
         except:
             tdcontent = response.xpath('//div[@id="tdcontent"]')
-            title = tdcontent.xpath('h1')[0].xpath('string(.)').extract_first().replace(' ', '')
+            try:
+                title_ = tdcontent.xpath('h1')[0].xpath('string(.)').extract_first().replace(' ', '')
+            except Exception as e:
+                try:
+                    title_ = tdcontent.xpath('h1/text()').extract_first().replace(' ', '')
+                except Exception as e:
+                    title_ = title
             content = ''
-            p_lis = tdcontent.extract()[0].split('<!--newstext-->')[1].split('<!--/newstext-->')[0].split('<br>')
-            for p in p_lis:
-                if('+newspiclink+"' in p):
-                    imgsrc = 'https://img.cfi.cn/readpic.aspx?imageid=' + "".join(re.findall('\d+', p.split('<script>')[1].split('</script>')[0]))
-                    c = re.sub(u"\\<script>.*?\\</script>", "", p).replace('\u3000', '')
-                    if(c.replace('\r', '').replace('\n', '').replace('\u3000', '')!=''):
-                        content = content + '<p>' + re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', '')) + '</p>' + '<img src=\'' + imgsrc + '\'/>'
+            try:
+                p_lis = tdcontent.extract_first().split('<!--newstext-->')[1].split('<!--/newstext-->')[0].split('<br>')
+                for p in p_lis:
+                    if('+newspiclink+"' in p):
+                        imgsrc = 'https://img.cfi.cn/readpic.aspx?imageid=' + "".join(re.findall('\d+', p.split('<script>')[1].split('</script>')[0]))
+                        c = re.sub(u"\\<script>.*?\\</script>", "", p).replace('\u3000', '')
+                        if(c.replace('\r', '').replace('\n', '').replace('\u3000', '')!=''):
+                            content = content + '<p>' + re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', '')) + '</p>' + '<img src=\'' + imgsrc + '\'/>'
+                        else:
+                            content = content + '<img src=\'' + imgsrc + '\'/>'
                     else:
-                        content = content + '<img src=\'' + imgsrc + '\'/>'
-                else:
-                    c = re.sub(u"\\<script>.*?\\</script>", "", p).replace('\u3000', '')
-                    content = content + '<p>' + re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', '')) + '</p>'
-            articleContentItem['title'] = title
+                        c = re.sub(u"\\<script>.*?\\</script>", "", p).replace('\u3000', '')
+                        content = content + '<p>' + re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', '')) + '</p>'
+            except Exception as e:
+                pass
+            articleContentItem['title'] = title_
             articleContentItem['content'] = content
             yield articleContentItem
