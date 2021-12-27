@@ -25,7 +25,7 @@ class anxinscSpider(scrapy.Spider):
             articleInfoItem['title'] = article.xpath(".//h2/a").xpath("string(.)").extract_first()
             url = response.url + article.xpath(".//h2/a/@href").extract_first().replace('/' + urlKind + '/', "")
             articleInfoItem['url'] = url
-            tag = article.xpath(".//div[@class='right-bottom']/span/text()").extract_first()
+            tag = article.xpath(".//div[@class='right-bottom']/a/text()").extract_first()
             articleInfoItem['tag'] = tag
             articleInfoItem['publishTime'] = article.xpath(".//div[@class='list-right']//div[@class='time-img ']/text()").extract_first()
             articleInfoItem['tableName'] = 'tb_keyparagraph_anxinsc_articleinfo'
@@ -46,12 +46,9 @@ class anxinscSpider(scrapy.Spider):
             if (paragraphList[i].replace("\r\n\t", "").replace("\xa0", "") != ""):
                 contentItem['url'] = response.url
                 contentItem['paragraph'] = paragraphList[i]
-                if (tagOri in paragraphList[i]):
+                if (tagOri and tagOri in paragraphList[i]):
                     contentItem['hasTag'] = 'True'
                 else:
                     contentItem['hasTag'] = 'False'
                 contentItem['tableName'] = 'tb_keyparagraph_anxinsc_articlecontent'
                 yield contentItem
-
-    def close(spider, reason):
-        print("爬取结束")

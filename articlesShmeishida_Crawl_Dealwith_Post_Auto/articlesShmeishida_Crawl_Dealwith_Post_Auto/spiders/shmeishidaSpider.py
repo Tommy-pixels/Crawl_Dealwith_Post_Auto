@@ -25,7 +25,6 @@ class shmeishidaSpider(scrapy.Spider):
 
     # 文章基础列表
     def parse(self, response, **kwargs):
-        print(response.url)
         # 对文章列表信息的处理
         urlKind = response.url.split('/')[-2]
         # 本页的文章信息列表
@@ -68,5 +67,3 @@ class shmeishidaSpider(scrapy.Spider):
                 contentItem['tableName'] = 'tb_keyparagraph_shmeishi_articlecontent'
                 yield contentItem
 
-    def close(spider, reason):
-        print("爬取结束")

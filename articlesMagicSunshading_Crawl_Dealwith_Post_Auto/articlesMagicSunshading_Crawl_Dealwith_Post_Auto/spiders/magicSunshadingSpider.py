@@ -27,7 +27,6 @@ class magicSunshading(scrapy.Spider):
         urlList = []
         # print(response.url)
         if(len(response.url.replace("https://www.magic-sunshading.com/","")) == 5):
-            print("parse runing")
             # 处理文章信息列表
             liList = response.xpath("//div[@class='article-list list-show']/ul/li")
 
@@ -64,5 +63,3 @@ class magicSunshading(scrapy.Spider):
                     articleContentItem['hasTag'] = 'False'
                 articleContentItem["tableName"] = 'tb_keyparagraph_magicsunshading_articlecontent'
                 yield articleContentItem
-    def close(spider, reason):
-        print("爬虫结束")
