@@ -10,6 +10,7 @@ class ArticlesPipeline:
         autocommit=True
     )
     cursor = conn.cursor()
+    title_lis = []
     def process_item(self, item, spider):
         title = item['title']
         content = item['content']
@@ -19,6 +20,7 @@ class ArticlesPipeline:
             title,
             content
         )
+        self.title_lis.append(title)
         self.cursor.execute(sql)
         return item
 
@@ -28,6 +30,9 @@ class ArticlesPipeline:
             self.cursor.close()
             self.conn.commit()
             self.conn.close()
-            print("关闭数据库连接成功")
         except Exception as e:
             print("关闭数据库连接失败")
+        print("-站点：{} ; 爬取类型：{}; 文章总数：{};".format(spider.name, 'article', len(self.title_lis)))
+        print("--文章title：")
+        for title in self.title_lis:
+            print('\t', title)

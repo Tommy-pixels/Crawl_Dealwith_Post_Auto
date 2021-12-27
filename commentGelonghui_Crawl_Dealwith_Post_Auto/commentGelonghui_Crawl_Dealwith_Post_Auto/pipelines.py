@@ -18,20 +18,24 @@ class CommentgelonghuiPipeline:
         autocommit=True
     )
     cursor = conn.cursor()
-
+    comment_lis = []
     def process_item(self, item, spider):
         comment = item['comment']
         publishTime = item['publishTime']
-        url = item['url']
         yesterdaySeconds = int(getSecondByDate(str(getCurDate()) + ' 00:00:00')) - 172800 # 48h前的时间戳（秒）
+        if("'" in comment):
+            comment = comment.replace('\'','"')
         if(int(publishTime)>int(yesterdaySeconds)):
             # 评论的发布时间在两天内则录入数据库
-            sql = "INSERT INTO `commentdatabase`.`tb_comment_gelonghui_content` (`comment`, `publishTime`, `url`) VALUES (\'{}\', \'{}\', \'{}\');".format(
+            sql = "INSERT INTO `commentdatabase`.`tb_comment_gelonghui_content` (`comment`, `publishTime`) VALUES (\'{}\', \'{}\');".format(
                 comment,
-                publishTime,
-                url
+                publishTime
             )
-            self.cursor.execute(sql)
+            try:
+                self.cursor.execute(sql)
+            except Exception as e:
+                print(sql)
+            self.comment_lis.append(comment)
         return item
 
     def close_spider(self, spider):
@@ -40,6 +44,6 @@ class CommentgelonghuiPipeline:
             self.cursor.close()
             self.conn.commit()
             self.conn.close()
-            print("关闭数据库连接成功")
         except Exception as e:
             print("关闭数据库连接失败")
+        print("- 站点：{} ; 爬取类型：{}; 评论总数：{};".format(spider.name, 'comment', len(self.comment_lis)))
