@@ -90,7 +90,7 @@ class ChinaipoSpider(scrapy.Spider):
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()
-                    content = content + '<img src=\'' + imgsrc + '\'/>'
+                    content = content + '<img src=\'https://www.chinaipo.com' + imgsrc + '\'/>'
 
         articleContentItem['title'] = title
         articleContentItem['content'] = content
