@@ -1,4 +1,5 @@
 import pymysql
+from auto_datahandler.customFunction__.Cleaner.base_cleaner import Base_Cleaner
 
 class ArticlesPipeline:
     # 设置数据库
@@ -16,6 +17,12 @@ class ArticlesPipeline:
         content = item['content']
         if('\"' in content):
             content = content.replace("\"", "\'")
+
+        content = Base_Cleaner.del_content_between(content, s_left='财联社', s_right='讯')
+        content = Base_Cleaner.del_content_between(content, s_left='（来源：', s_right='）')
+        if(content.startswith('，') or content.startswith(',')):
+            content = content[1:]
+
         sql = "INSERT INTO `articledatabase`.`tb_article_cailianshe_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
             title,
             content
