@@ -17,7 +17,7 @@ class ArticlesPipeline:
         content = item['content']
         if('\"' in content):
             content = content.replace("\"", "\'")
-
+        content = Base_Cleaner.del_content_between(content, s_left='（财联社', s_right='）')
         content = Base_Cleaner.del_content_between(content, s_left='财联社', s_right='讯')
         content = Base_Cleaner.del_content_between(content, s_left='（来源：', s_right='）')
         if(content.startswith('，') or content.startswith(',')):

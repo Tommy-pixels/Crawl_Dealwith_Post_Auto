@@ -85,7 +85,7 @@ class ChinaipoSpider(scrapy.Spider):
         for p in pList:
 
             c = "".join(p.xpath('string(.)').extract()).replace('\n','').replace('\r', '').replace('\t', '')
-            if(c!='' and '来源:' not in c and '头图来源' not in c and '转载声明' not in c and '风险提示' not in c and '关键词'not in c):
+            if(c!='' and '来源:' not in c and '头图来源' not in c and '转载声明' not in c and '风险提示' not in c and '关键词'not in c and '声明：' not in c and '本文来源：' not in c):
                 content = content + "<p>" + c + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
