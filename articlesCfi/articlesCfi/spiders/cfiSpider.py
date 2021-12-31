@@ -102,7 +102,7 @@ class NbdSpider(scrapy.Spider):
                     break
                 if (c != '' and '每经编辑：' not in c and '来源：' not in c and '仅供参考' not in c and '编辑：' not in c
                         and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
-                        and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c
+                        and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c and '编辑' not in c and '校对' not in c and '封面图' not in c
                 ):
                     content = content + '<p>' + c.replace('\n', '').replace(' ','').replace('\u3000', '') + '</p>'
                 if (img_lis != []):
