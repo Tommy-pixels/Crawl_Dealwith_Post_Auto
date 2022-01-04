@@ -78,7 +78,7 @@ class PedailySpider(scrapy.Spider):
     def article_content(self, response, title):
         content = ''
         articleContentItem = items.ArticleContentItem()
-        pList = response.xpath("//div[@id='news-content']/*")
+        pList = response.xpath("//div[@id='news-content']/p")
         for p in pList:
             c = "".join(p.xpath('string(.)').extract())
             if(c!='' and '投资界原创' not in c):
