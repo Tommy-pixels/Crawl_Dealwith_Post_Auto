@@ -6,7 +6,7 @@
         last_time   1628813160
         channel_id  115
 """
-import scrapy, json, random
+import scrapy, json, random,re
 from .. import items
 from fake_useragent import UserAgent
 import time
@@ -67,7 +67,6 @@ class huxiuSpider(scrapy.Spider):
 
     def parse_info(self, response, **kwargs):
         if(response.status==200):
-            print('第几次')
             data = json.loads(response.body)["data"]
             dataList = data['dataList']
             # 在parse中返回的Item对象会传到Pipeline 返回的Request会加入请求队列
@@ -125,11 +124,22 @@ class huxiuSpider(scrapy.Spider):
         pList = response.xpath('//div[@id="article-content"]/*')
         for p in pList:
             c = p.xpath('string(.)').extract_first()
-            if(c!='' and '本文来自' not in c and '作者：' not in c):
+            if (c != '' and '本文来自' not in c and '作者：' not in c and '参考链接' not in c and '参考资料' not in c
+                    and '（应受访者要求，文中均为化名）' not in c and '原文链接' not in c and '出品｜' not in c and '作者｜' not in c and '题图｜' not in c and '出品 |' not in c
+                    and '作者 |' not in c and '头图 |' not in c and '扫描图末二维码' not in c and '虎嗅注' not in c
+            ):
+                if ('化名' in c):
+                    if (len(re.compile(u"（.*?化名）").match(c)[0]) <= 20):
+                        c = re.sub(u"（.*?化名）", "", c)
+                    else:
+                        pass
                 content = content + '<p>' + c + '</p>'
-            if(p.xpath('.//img')!=[]):
+            if (p.xpath('.//img') != []):
                 for img in p.xpath('.//img'):
                     content = content + '<img src="' + img.xpath('./@_src').extract_first() + '"/>'
+            if ('参考资料' in c or '参考链接' in c):
+                break
+
         articleContentItem = items.ArticleContentItem()
         articleContentItem['title'] = title
         articleContentItem['content'] = content

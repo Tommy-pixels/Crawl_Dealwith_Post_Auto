@@ -1,4 +1,4 @@
-import pymysql, time
+import pymysql, time, re
 
 # 获取当前日期
 def getCurDate():
@@ -26,6 +26,8 @@ class ArticlePipeline:
             content = item['content']
             if('\'' in content):
                 content = content.replace('\'', "\"")
+            if('via' in content):
+                content = re.sub(u"\\（via.*?\\）", "", content)
             sql = "INSERT INTO `articledatabase`.`tb_article_huxiu_content` (`title`, `content`) VALUES (\'{}\',\'{}\');".format(
                 title,
                 content
