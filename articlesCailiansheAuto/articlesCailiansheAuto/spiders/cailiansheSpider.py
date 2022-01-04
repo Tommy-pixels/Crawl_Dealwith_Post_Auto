@@ -1,6 +1,7 @@
 import scrapy, hashlib, json
 from auto_datahandler.basement__.ContralerTime import Contraler_Time
 from .. import items
+from auto_datahandler.customFunction__.Cleaner.base_cleaner import Base_Cleaner
 
 
 def sha1(s):
@@ -99,6 +100,12 @@ class CailiansheSpider(scrapy.Spider):
         for p in pList:
             c = "".join(p.xpath('string(.)').extract())
             if(c!=''):
+                c = Base_Cleaner.del_content_between(c, s_left='（财联社', s_right='）')
+                c = Base_Cleaner.del_content_between(c, s_left='财联社', s_right='讯')
+                c = Base_Cleaner.del_content_between(c, s_left='（来源：', s_right='）')
+                c = Base_Cleaner.del_content_between(c, s_left='（', s_right='）讯')
+                if (c.startswith('，') or c.startswith(',')):
+                    c = c[1:]
                 content = content + "<p>" + c + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
