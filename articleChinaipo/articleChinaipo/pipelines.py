@@ -18,8 +18,12 @@ class ArticlesPipeline:
         if('\"' in content):
             content = content.replace("\"", "\'")
         _curDate = Contraler_Time.getCurDate(formatStr='%m-%d').split('-')
-        if (_curDate[0] + '月' + _curDate[1] + '日' + '，资本邦了解到，' in content):
-            content = content.replace(_curDate[0] + '月' + _curDate[1] + '日' + '，资本邦了解到，', '')
+        if (str(int(_curDate[0])) + '月' + str(int(_curDate[1])) + '日' + '，资本邦了解到，' in content):
+            content = content.replace(str(int(_curDate[0])) + '月' + str(int(_curDate[1])) + '日' + '，资本邦了解到，', '')
+        if('近日，资本邦了解到，' in content):
+            content = content.replace('近日，资本邦了解到，', '')
+        if('资本邦了解到，' in content):
+            content = content.replace('资本邦了解到，', '')
         if(len(content.replace('<p>','').replace('</p>',''))>515):
             sql = "INSERT INTO `articledatabase`.`tb_article_chinaipo_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
                 title,
