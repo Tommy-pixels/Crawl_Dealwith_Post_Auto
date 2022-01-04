@@ -51,7 +51,8 @@ class aigupiaoSpider(scrapy.Spider):
         content = ''
         for p in pList:
             c = p.xpath('string(.)').extract_first()
-            if (c != '' and '爱股票社区' not in c and '作者个人' not in c and '仅供参考' not in c):
+            if (c != '' and '爱股票社区' not in c and '作者个人' not in c and '仅供参考' not in c and '笔者简介' not in c and '转载' not in c and '文章来源：' not in c
+                and '作者：' not in c and '来源：' not in c):
                 content = content + '<p>' + p.xpath('string(.)').extract_first() + '</p>'
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath(".//img"):
