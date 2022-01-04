@@ -1,4 +1,4 @@
-import scrapy
+import scrapy, re
 from fake_useragent import UserAgent
 from auto_datahandler.basement__ import ContralerTime
 from .. import items
@@ -47,6 +47,11 @@ class XinhuaSpider(scrapy.Spider):
         for p in pList:
             c = p.xpath('string(.)').extract_first()
             if(c!=''):
+                for i in re.compile(u"（.*?）").findall(c):
+                    if (len(i) <= 5):
+                        c = c.replace(i, '')
+                    else:
+                        pass
                 content =  content + '<p>' + c + '</p>'
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
