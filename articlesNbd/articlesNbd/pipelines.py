@@ -1,4 +1,3 @@
-import scrapy
 import pymysql
 
 
@@ -18,6 +17,10 @@ class ArticleContentPipeline:
         content = item['content']
         if('"' in content):
             content = content.replace('"', '\'')
+        if ('每经AI快讯，' in content):
+            content = content.replace('每经AI快讯，', '')
+        if ('每经AI快讯：' in content):
+            content = content.replace('每经AI快讯：', '')
         sql = "INSERT INTO `articledatabase`.`tb_article_nbd_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
             title,
             content

@@ -1,6 +1,8 @@
 import scrapy, time
 from fake_useragent import UserAgent
 from .. import items
+from auto_datahandler.customFunction__.Cleaner import cleaner_article
+
 
 # 获取当前日期
 def getCurDate():
@@ -63,15 +65,24 @@ class NbdSpider(scrapy.Spider):
         title = response.xpath('//h1')[0].xpath('string(.)').extract_first().replace('\n', '').replace(' ','')
         pList = response.xpath('//div[@class="g-articl-text"]/p')
         content = ''
+        word_lis = [
+            '公众号）', '微博）', '新闻）', '时报）', '日报）'
+        ]
         for p in pList:
-            c = p.xpath('string(.)').extract_first()
-            if ('扫描下方二维码' in c):
+            c = p.xpath('string(.)').extract_first().replace('\n', '').replace(' ','')
+            if ('扫描下方二维码' in c or '每日经济新闻综合' in c):
                 break
-            if (c != '' and '每经编辑：' not in c and '来源：' not in c and '仅供参考' not in c and '编辑：' not in c
+            if('每日经济新闻综合' in c):
+                continue
+            for i in word_lis:
+                if (i in c):
+                    c = cleaner_article.Cleaner_Article().del_content_between(c, s_left='（', s_right=i)
+            if (c != '' and '每经编辑：' not in c and '来源：' not in c and '仅供参考' not in c and '编辑：' not in c and '校对|' not in c and '编辑|' not in c
                     and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
-                    and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c
+                    and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c and '（北京日报）' not in c and '每经编辑' not in c
             ):
-                content = content + '<p>' + p.xpath('string(.)').extract_first().replace('\n', '').replace(' ','') + '</p>'
+                content = content + '<p>' + c + '</p>'
+
             if (p.xpath('.//img') != []):
                 for img in p.xpath(".//img"):
                     content = content + '<img src=\'' + img.xpath('./@src').extract_first() + '\' />'
