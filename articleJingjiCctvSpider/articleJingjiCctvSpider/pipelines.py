@@ -1,8 +1,6 @@
-import pymysql, re
+import pymysql
 
-def del_brackets(s, sl,sr):
-    r_rule = u"\\" + sl + u".*?" + sr
-    return re.sub(r_rule, "", s)
+
 
 class ArticlesPipeline:
     # 设置数据库
@@ -18,11 +16,8 @@ class ArticlesPipeline:
     def process_item(self, item, spider):
         title = item['title']
         content = item['content']
-        if('\"' in content or '央视网消息' in content or '本报讯' in content):
-            content = content.replace("\"", "\'").replace('央视网消息', '').replace('本报讯', '')
-        content = del_brackets(content, sl='（记者', sr='）')
-        if(content.startswith('：') or content.startswith(':')):
-            content = content[1:]
+        if('\"' in content):
+            content = content.replace("\"", "\'")
         sql = "INSERT INTO `articledatabase`.`tb_article_cctvjingji_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
             title,
             content

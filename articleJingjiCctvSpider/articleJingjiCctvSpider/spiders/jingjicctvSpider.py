@@ -1,8 +1,11 @@
-import json
+import json, re
 import scrapy, time
 from .. import items
 from fake_useragent import UserAgent
 
+def del_brackets(s, sl,sr):
+    r_rule = u"\\" + sl + u".*?" + sr
+    return re.sub(r_rule, "", s)
 
 def getSecondByDate(date):
     b = time.strptime(date, '%Y-%m-%d %H:%M:%S')
@@ -49,13 +52,12 @@ class CctvJingjiSpider(scrapy.Spider):
     def article_info(self, response):
         datalis = json.loads(response.text[:-1].replace('economy_zixun(', ''))['data']['list']
         articlelis = []
-        datalis = datalis[1:6]
         for article in datalis:
             title = article['title']
             article_url = article['url']
             publish_time = article['focus_date']
-            # if(int(getSecondByDate(publish_time)) > getMilliSecond()-3600*3):
-            articlelis.append((title, article_url))
+            if(int(getSecondByDate(publish_time)) > getMilliSecond()-3600*5):
+                articlelis.append((title, article_url))
         cb_p = {}
         for article_url in articlelis:
             cb_p['title'] = article_url[0]
@@ -75,7 +77,12 @@ class CctvJingjiSpider(scrapy.Spider):
         pList = response.xpath("//div[@class='content_area']/*")
         for p in pList:
             c = "".join(p.xpath('string(.)').extract()).replace('\u3000', '').replace('\n', '')
-            if(c!='' and '本报记者' not in c):
+            if(c!='' and '本报记者' not in c and '见习记者 ' not in c and '记者 ' not in c):
+                if('央视网消息' in c or '本报讯' in c):
+                    c = c.replace('央视网消息', '').replace('本报讯', '')
+                c = del_brackets(c, sl='（记者', sr='）')
+                if (content.startswith('：') or content.startswith(':')):
+                    content = content[1:]
                 content = content + "<p>" + c + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
