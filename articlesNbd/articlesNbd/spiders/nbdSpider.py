@@ -70,7 +70,7 @@ class NbdSpider(scrapy.Spider):
         ]
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\n', '').replace(' ','')
-            if ('扫描下方二维码' in c or '每日经济新闻综合' in c):
+            if ('扫描下方二维码' in c or '每日经济新闻综合' in c or '未经许可禁止转载' in c or '原创文章｜' in c):
                 break
             if('每日经济新闻综合' in c):
                 continue
@@ -79,7 +79,7 @@ class NbdSpider(scrapy.Spider):
                     c = cleaner_article.Cleaner_Article().del_content_between(c, s_left='（', s_right=i)
             if (c != '' and '每经编辑：' not in c and '来源：' not in c and '仅供参考' not in c and '编辑：' not in c and '校对|' not in c and '编辑|' not in c
                     and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
-                    and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c and '（北京日报）' not in c and '每经编辑' not in c
+                    and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c and '（北京日报）' not in c and '每经编辑' not in c and '记者|' not in c
             ):
                 content = content + '<p>' + c + '</p>'
 

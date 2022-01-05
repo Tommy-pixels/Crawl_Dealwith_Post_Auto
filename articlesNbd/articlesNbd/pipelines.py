@@ -21,6 +21,9 @@ class ArticleContentPipeline:
             content = content.replace('每经AI快讯，', '')
         if ('每经AI快讯：' in content):
             content = content.replace('每经AI快讯：', '')
+        lis = content.split('<img')
+        if('.png' in lis[-1] and '<p' not in lis[-1]):
+            content = content.replace('<img src=' + lis[-1].replace('/>', '').replace('src=', '').replace(' ', '') + ' />', '')
         sql = "INSERT INTO `articledatabase`.`tb_article_nbd_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
             title,
             content
