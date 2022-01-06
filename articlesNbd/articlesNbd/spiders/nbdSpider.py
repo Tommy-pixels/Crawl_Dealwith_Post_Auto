@@ -66,7 +66,7 @@ class NbdSpider(scrapy.Spider):
         pList = response.xpath('//div[@class="g-articl-text"]/p')
         content = ''
         word_lis = [
-            '公众号）', '微博）', '新闻）', '时报）', '日报）'
+            '公众号）', '微博）', '新闻）', '时报）', '日报）', '化名）'
         ]
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\n', '').replace(' ','')
