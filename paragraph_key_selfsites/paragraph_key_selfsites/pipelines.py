@@ -1,25 +1,17 @@
 import pymysql
 
-
-# æ¸…æ´—æ‰ç©ºæ ¼å’Œç»“å°¾çš„ç©ºæ ¼
-def delSpace(paragraph):
-    return paragraph.strip()
-
-class ArticlePipeline:
-    paragraph_lis = []
+class ParagraphPipeline:
     conn = pymysql.connect(
         host='localhost',
         user="root",
         passwd="root",
-        db="paragraphdatabase",
         autocommit=True
     )
     cursor = conn.cursor()
     paragraph_lis = []
     def process_item(self, item, spider):
-        # æ–‡ç« å†…å®¹çš„å¤„ç†
-        sql = "INSERT INTO `paragraphdatabase`.`tb_keyparagraph_anxinsc_content` (`paragraph`, `tag_ori`) VALUES (\'{}\',\'{}\');".format(
-            delSpace(item['paragraph']),
+        sql = "INSERT INTO `paragraphdatabase`.`tb_keyparagraph_selfsites_content` (`paragraph`, `tag_ori`) VALUES (\'{}\',\'{}\');".format(
+            item['paragraph'],
             item['tag_ori'],
         )
         try:
@@ -29,12 +21,14 @@ class ArticlePipeline:
         self.paragraph_lis.append(item['paragraph'])
         return item
 
+
     def close_spider(self, spider):
-        # å…³é—­æ•°æ®åº“
+        # ¹Ø±ÕÊı¾İ¿â
         try:
             self.cursor.close()
             self.conn.commit()
             self.conn.close()
         except Exception as e:
-            print("å…³é—­æ•°æ®åº“è¿æ¥å¤±è´¥")
-        print("- ç«™ç‚¹ï¼š{} ; çˆ¬å–ç±»å‹ï¼š{}; æ®µè½æ€»æ•°ï¼š{};".format(spider.name, 'keyparagraph', len(self.paragraph_lis)))
+            print("¹Ø±ÕÊı¾İ¿âÁ¬½ÓÊ§°Ü")
+            pass
+        print("- Õ¾µã£º{} ; ÅÀÈ¡ÀàĞÍ£º{}; ¶ÎÂä×ÜÊı£º{};".format(spider.name, 'keyparagraph', len(self.paragraph_lis)))

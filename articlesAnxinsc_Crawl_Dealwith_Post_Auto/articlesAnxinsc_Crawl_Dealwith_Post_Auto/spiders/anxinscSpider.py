@@ -1,10 +1,11 @@
 import scrapy
 from .. import items
+from auto_datahandler.basement__.ContralerTime import Contraler_Time
 
 class anxinscSpider(scrapy.Spider):
     name = "anxinscSpider"
     start_urls = [
-        'https://www.anxinsc.com/pzyys',
+        'https://www.anxinsc.com/',
         'https://www.anxinsc.com/pzcg/',
         'https://www.anxinsc.com/pzpt/',
         'https://www.anxinsc.com/zxpz/',
@@ -18,37 +19,29 @@ class anxinscSpider(scrapy.Spider):
     def parse_Info(self, response, **kwargs):
         # 获取文章列表
         articleList = response.xpath("//div[@class='article-list list-show']/ul/li")
-        articleInfoItem = items.ArticleInfoItem()
         urlKind = response.url.split('/')[-2]
         articleUrlList = []
+        today = Contraler_Time.getCurDate('%m%d')
         for article in articleList:
-            articleInfoItem['title'] = article.xpath(".//h2/a").xpath("string(.)").extract_first()
-            url = response.url + article.xpath(".//h2/a/@href").extract_first().replace('/' + urlKind + '/', "")
-            articleInfoItem['url'] = url
-            tag = article.xpath(".//div[@class='right-bottom']/a/text()").extract_first()
-            articleInfoItem['tag'] = tag
-            articleInfoItem['publishTime'] = article.xpath(".//div[@class='list-right']//div[@class='time-img ']/text()").extract_first()
-            articleInfoItem['tableName'] = 'tb_keyparagraph_anxinsc_articleinfo'
-            articleUrlList.append((url, tag))
-            yield articleInfoItem
-
+            title = article.xpath(".//h2/a").xpath("string(.)").extract_first()
+            url_part = article.xpath(".//h2/a/@href").extract_first()
+            url = response.url + url_part.replace('/' + urlKind + '/', "")
+            tag_ori = article.xpath(".//div[@class='right-bottom']/span[@class='name']/text()").extract_first()
+            publish_date = url_part.split('/')[-2]
+            if(publish_date == today):
+                articleUrlList.append((url, tag_ori))
         for urlItem in articleUrlList:
             add_para = {}
-            add_para['tagOri'] = urlItem[1]
+            add_para['tag_ori'] = urlItem[1]
             yield scrapy.Request(url=urlItem[0], callback=self.parse_content, cb_kwargs=add_para, dont_filter=True)
 
 
-    def parse_content(self, response, tagOri):
+    def parse_content(self, response, tag_ori):
         # 对文章内容进行处理
         paragraphList = response.xpath("//div[@class='article-content']/p").xpath("string(.)").extract()
         contentItem = items.ArticleContentItem()
         for i in range(1, len(paragraphList) - 1):
             if (paragraphList[i].replace("\r\n\t", "").replace("\xa0", "") != ""):
-                contentItem['url'] = response.url
                 contentItem['paragraph'] = paragraphList[i]
-                if (tagOri and tagOri in paragraphList[i]):
-                    contentItem['hasTag'] = 'True'
-                else:
-                    contentItem['hasTag'] = 'False'
-                contentItem['tableName'] = 'tb_keyparagraph_anxinsc_articlecontent'
+                contentItem['tag_ori'] = tag_ori
                 yield contentItem
