@@ -1,7 +1,7 @@
 import scrapy
 from .. import items
 from auto_datahandler.basement__.ContralerTime import Contraler_Time
-class nbhxedudaSpider(scrapy.Spider):
+class NbhxedudaSpider(scrapy.Spider):
     name = 'nbhxeduSpider'
     start_urls = [
         'https://www.nbhxedu.com/',

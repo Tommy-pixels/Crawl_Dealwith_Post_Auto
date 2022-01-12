@@ -1,3 +1,4 @@
+# encoding=utf-8
 import pymysql
 
 class ParagraphPipeline:
@@ -23,12 +24,12 @@ class ParagraphPipeline:
 
 
     def close_spider(self, spider):
-        # ¹Ø±ÕÊı¾İ¿â
+        # å…³é—­æ•°æ®åº“
         try:
             self.cursor.close()
             self.conn.commit()
             self.conn.close()
         except Exception as e:
-            print("¹Ø±ÕÊı¾İ¿âÁ¬½ÓÊ§°Ü")
+            # print("å…³é—­æ•°æ®åº“å¤±è´¥")
             pass
-        print("- Õ¾µã£º{} ; ÅÀÈ¡ÀàĞÍ£º{}; ¶ÎÂä×ÜÊı£º{};".format(spider.name, 'keyparagraph', len(self.paragraph_lis)))
+        # print("- ç«™ç‚¹ï¼š{} ; çˆ¬å–ç±»å‹ï¼š{}; æ®µè½æ€»æ•°ï¼š{};".format(spider.name, 'keyparagraph', len(self.paragraph_lis)))

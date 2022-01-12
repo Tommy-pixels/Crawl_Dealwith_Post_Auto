@@ -1,13 +1,14 @@
 import scrapy
 from .. import items
 from auto_datahandler.basement__.ContralerTime import Contraler_Time
-class XadfxxSpider(scrapy.Spider):
-    name = 'xadfxxSpider'
+class ChdxSpider(scrapy.Spider):
+    name = 'chdxSpider'
     start_urls = [
-        'https://www.xadfxx.com/zxpzcg/',
-        'https://www.xadfxx.com/pzpt/',
-        'https://www.xadfxx.com/pzgs/',
-        'https://www.xadfxx.com/pzhq/'
+        'https://www.ch-dx.com/',
+        'https://www.ch-dx.com/gppzwz/',
+        'https://www.ch-dx.com/pzpt/',
+        'https://www.ch-dx.com/pzcg/',
+        'https://www.ch-dx.com/pzkh/'
     ]
 
     def start_requests(self):
@@ -16,23 +17,23 @@ class XadfxxSpider(scrapy.Spider):
 
     def parse_articleInfo(self, response, **kwargs):
         # 本页的文章信息列表
-        articleList = response.xpath("//div[@class='chapter-num chapter-show']/ul/li")
+        articleList = response.xpath("//div[@class='article-list list-show']/ul/li")
         articles_url_lis = []
         today_date = Contraler_Time.getCurDate('%m%d')
         for article in articleList:
             url_part = article.xpath(".//h2/a/@href").extract_first()
-            article_url = 'https://www.xadfxx.com' + url_part
+            article_url = 'https://www.ch-dx.com' + url_part
             try:
-                tag_ori = article.xpath(".//div[@class='clearfix address']/a[@class='biao qian label']/text()").extract_first()
+                tag_ori = article.xpath(".//div[@class='clearfix clearfix2']/a[@class='biao qian label']/text()").extract_first()
             except Exception as e:
                 continue
             if (not tag_ori):
                 continue
-            # publish_date = url_part.split('/')[-2]
-            # if(today_date!=publish_date):
-            #     continue
-            # else:
-            articles_url_lis.append((article_url, tag_ori))
+            publish_date = url_part.split('/')[-2]
+            if(today_date!=publish_date):
+                continue
+            else:
+                articles_url_lis.append((article_url, tag_ori))
         for url in articles_url_lis:
             add_para = {}
             add_para['tag_ori'] = url[1]
