@@ -70,7 +70,7 @@ class NbdSpider(scrapy.Spider):
         ]
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\n', '').replace(' ','')
-            if ('扫描下方二维码' in c or '每日经济新闻综合' in c or '未经许可禁止转载' in c or '原创文章｜' in c):
+            if ('扫描下方二维码' in c or '每日经济新闻综合' in c or '未经许可禁止转载' in c or '原创文章｜' in c or '本文來自' in c):
                 break
             if('每日经济新闻综合' in c):
                 continue
