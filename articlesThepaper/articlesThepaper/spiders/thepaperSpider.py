@@ -74,7 +74,7 @@ class ThepaperSpider(scrapy.Spider):
                     paragraph!=hideword
                     and paragraph.replace(' ', '').replace('\n', '').replace(' ', '') != ''
                     and '来源：' not in paragraph
-                    and '（原题' not in paragraph
+                    and '（原题' not in paragraph and '（文中' not in paragraph and '（原标题' not in paragraph
                     and '（执业证书：' not in paragraph
             ):
                 content = content + '<p>' + paragraph + '</p>'
