@@ -2,6 +2,7 @@ import json, re
 import scrapy, time
 from .. import items
 from fake_useragent import UserAgent
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 
 def del_brackets(s, sl,sr):
     r_rule = u"\\" + sl + u".*?" + sr
@@ -83,7 +84,7 @@ class CctvJingjiSpider(scrapy.Spider):
                 c = del_brackets(c, sl='（记者', sr='）')
                 if (content.startswith('：') or content.startswith(':')):
                     content = content[1:]
-                content = content + "<p>" + c + "</p>"
+                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

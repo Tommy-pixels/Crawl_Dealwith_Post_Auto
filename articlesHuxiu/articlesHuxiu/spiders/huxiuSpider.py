@@ -10,6 +10,7 @@ import scrapy, json, random,re
 from .. import items
 from fake_useragent import UserAgent
 import time
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 
 
 # --------------------------- 随机时间休眠 ----------------------------------
@@ -138,7 +139,7 @@ class huxiuSpider(scrapy.Spider):
                             c = re.sub(u"（.*?化名）", "", c)
                         else:
                             pass
-                content = content + '<p>' + c + '</p>'
+                content = content + '<p>' + Cleaner_Paragraph().integratedOp(c) + '</p>'
             if (p.xpath('.//img') != []):
                 for img in p.xpath('.//img'):
                     content = content + '<img src="' + img.xpath('./@_src').extract_first() + '"/>'

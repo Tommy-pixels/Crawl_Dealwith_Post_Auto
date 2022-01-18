@@ -1,6 +1,8 @@
 import scrapy
 from fake_useragent import UserAgent
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 from .. import items
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 
 class ThepaperSpider(scrapy.Spider):
     name = 'thepaperSpider'
@@ -77,7 +79,7 @@ class ThepaperSpider(scrapy.Spider):
                     and '（原题' not in paragraph and '（文中' not in paragraph and '（原标题' not in paragraph
                     and '（执业证书：' not in paragraph
             ):
-                content = content + '<p>' + paragraph + '</p>'
+                content = content + '<p>' + Cleaner_Paragraph().integratedOp(paragraph) + '</p>'
                 if(imgsList):
                     content = content + '<img src=\'' + imgsList[0] + '\' />'
                     imgsList.pop(imgsList.index(imgsList[0]))

@@ -1,6 +1,7 @@
 import scrapy, time
 from .. import items
 from fake_useragent import UserAgent
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 
 
 def getSecondByDate(date):
@@ -82,7 +83,7 @@ class PedailySpider(scrapy.Spider):
         for p in pList:
             c = "".join(p.xpath('string(.)').extract())
             if(c!='' and '投资界原创' not in c):
-                content = content + "<p>" + c + "</p>"
+                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

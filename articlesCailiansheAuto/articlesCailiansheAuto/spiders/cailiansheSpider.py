@@ -2,7 +2,7 @@ import scrapy, hashlib, json
 from auto_datahandler.basement__.ContralerTime import Contraler_Time
 from .. import items
 from auto_datahandler.customFunction__.Cleaner.base_cleaner import Base_Cleaner
-
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 
 def sha1(s):
     if(not isinstance(s, bytes)):
@@ -106,7 +106,7 @@ class CailiansheSpider(scrapy.Spider):
                 c = Base_Cleaner.del_content_between(c, s_left='（', s_right='）讯')
                 if (c.startswith('，') or c.startswith(',')):
                     c = c[1:]
-                content = content + "<p>" + c + "</p>"
+                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

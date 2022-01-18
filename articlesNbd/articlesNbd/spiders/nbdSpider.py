@@ -1,8 +1,7 @@
 import scrapy, time
 from fake_useragent import UserAgent
 from .. import items
-from auto_datahandler.customFunction__.Cleaner import cleaner_article
-
+from auto_datahandler.customFunction__.Cleaner import cleaner_article, cleaner_paragraph
 
 # 获取当前日期
 def getCurDate():
@@ -81,12 +80,13 @@ class NbdSpider(scrapy.Spider):
                     and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
                     and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c and '（北京日报）' not in c and '每经编辑' not in c and '记者|' not in c
             ):
+                c = cleaner_paragraph.Cleaner_Paragraph().integratedOp(c)
                 content = content + '<p>' + c + '</p>'
 
             if (p.xpath('.//img') != []):
                 for img in p.xpath(".//img"):
                     content = content + '<img src=\'' + img.xpath('./@src').extract_first() + '\' />'
-
+        title = cleaner_article.Cleaner_Article().clean_title(title)
         articleContentItem['title'] = title
         articleContentItem['content'] = content
         yield articleContentItem

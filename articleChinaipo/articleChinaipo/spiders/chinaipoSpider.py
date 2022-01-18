@@ -1,5 +1,6 @@
 import scrapy, hashlib, json
 from auto_datahandler.basement__.ContralerTime import Contraler_Time
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 from fake_useragent import UserAgent
 from .. import items
 
@@ -86,7 +87,7 @@ class ChinaipoSpider(scrapy.Spider):
 
             c = "".join(p.xpath('string(.)').extract()).replace('\n','').replace('\r', '').replace('\t', '')
             if(c!='' and '来源:' not in c and '头图来源' not in c and '转载声明' not in c and '风险提示' not in c and '关键词'not in c and '声明：' not in c and '本文来源：' not in c):
-                content = content + "<p>" + c + "</p>"
+                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

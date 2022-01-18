@@ -4,6 +4,8 @@ from fake_useragent import UserAgent
 import bs4
 from .. import items
 from auto_datahandler.basement__.ContralerTime import Contraler_Time
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+
 
 class WallstreetcnSpider(scrapy.Spider):
     name = 'wallstreetcnSpider'
@@ -104,7 +106,7 @@ class WallstreetcnSpider(scrapy.Spider):
         for p in p_lis:
             paragraph = p.text.replace(' ', '').replace('\n','').replace('\t','')
             if(paragraph):
-                content = content + '<p>' + p.text + '</p>'
+                content = content + '<p>' + Cleaner_Paragraph().integratedOp(p.text) + '</p>'
             try:
                 has_img = p.find('img')
             except Exception as e:

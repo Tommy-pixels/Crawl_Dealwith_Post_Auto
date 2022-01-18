@@ -2,6 +2,8 @@ import scrapy, re
 from fake_useragent import UserAgent
 from auto_datahandler.basement__ import ContralerTime
 from .. import items
+from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+
 
 class XinhuaSpider(scrapy.Spider):
     name = 'xinhuaSpider'
@@ -52,7 +54,7 @@ class XinhuaSpider(scrapy.Spider):
                         c = c.replace(i, '')
                     else:
                         pass
-                content =  content + '<p>' + c + '</p>'
+                content =  content + '<p>' + Cleaner_Paragraph().integratedOp(c) + '</p>'
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     content = content + '<img src=\'' + img.xpath('.//@src').extract_first() + '\'/>'
