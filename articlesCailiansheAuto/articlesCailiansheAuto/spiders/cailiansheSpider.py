@@ -3,6 +3,7 @@ from auto_datahandler.basement__.ContralerTime import Contraler_Time
 from .. import items
 from auto_datahandler.customFunction__.Cleaner.base_cleaner import Base_Cleaner
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 def sha1(s):
     if(not isinstance(s, bytes)):
@@ -74,14 +75,15 @@ class CailiansheSpider(scrapy.Spider):
                 articlelis.append((title, article_url))
         cb_p = {}
         for article_url in articlelis:
-            cb_p['title'] = article_url[0]
-            yield scrapy.Request(
-                url=article_url[1],
-                headers=self.headers,
-                cookies=self.cookies,
-                callback=self.article_content,
-                cb_kwargs=cb_p
-            )
+            if (Base_Identifier.is_intterrogative(article_url[0])):
+                cb_p['title'] = article_url[0]
+                yield scrapy.Request(
+                    url=article_url[1],
+                    headers=self.headers,
+                    cookies=self.cookies,
+                    callback=self.article_content,
+                    cb_kwargs=cb_p
+                )
 
         if(last_ctime>int(Contraler_Time.getSecondByDate(Contraler_Time.getCurDate("%Y%m%d")+ " 00:00:00"))):
             paramstr = self.keyparams.format(last_ctime)
@@ -97,6 +99,7 @@ class CailiansheSpider(scrapy.Spider):
         content = ''
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath("//div[@class='m-b-40 detail-content ']//div['m-b-10']/*")
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = "".join(p.xpath('string(.)').extract())
             if(c!=''):
@@ -106,7 +109,8 @@ class CailiansheSpider(scrapy.Spider):
                 c = Base_Cleaner.del_content_between(c, s_left='（', s_right='）讯')
                 if (c.startswith('，') or c.startswith(',')):
                     c = c[1:]
-                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
+                c = cleaner_paragraph.integratedOp(c)
+                content = content + "<p>" + c + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

@@ -3,6 +3,7 @@ import scrapy, time
 from .. import items
 from fake_useragent import UserAgent
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 def del_brackets(s, sl,sr):
     r_rule = u"\\" + sl + u".*?" + sr
@@ -61,21 +62,23 @@ class CctvJingjiSpider(scrapy.Spider):
                 articlelis.append((title, article_url))
         cb_p = {}
         for article_url in articlelis:
-            cb_p['title'] = article_url[0]
-            self.headers['Host'] = 'jingji.cctv.com'
-            self.headers['User-Agent'] = str(UserAgent().random)
-            yield scrapy.Request(
-                url=article_url[1],
-                headers=self.headers,
-                cookies=self.cookies,
-                callback=self.article_content,
-                cb_kwargs=cb_p
-            )
+            if (Base_Identifier.is_intterrogative(article_url[0])):
+                cb_p['title'] = article_url[0]
+                self.headers['Host'] = 'jingji.cctv.com'
+                self.headers['User-Agent'] = str(UserAgent().random)
+                yield scrapy.Request(
+                    url=article_url[1],
+                    headers=self.headers,
+                    cookies=self.cookies,
+                    callback=self.article_content,
+                    cb_kwargs=cb_p
+                )
 
     def article_content(self, response, title):
         content = ''
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath("//div[@class='content_area']/*")
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = "".join(p.xpath('string(.)').extract()).replace('\u3000', '').replace('\n', '')
             if(c!='' and '本报记者' not in c and '见习记者 ' not in c and '记者 ' not in c):
@@ -84,7 +87,8 @@ class CctvJingjiSpider(scrapy.Spider):
                 c = del_brackets(c, sl='（记者', sr='）')
                 if (content.startswith('：') or content.startswith(':')):
                     content = content[1:]
-                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
+                c = cleaner_paragraph.integratedOp(c)
+                content = content + "<p>" + c + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

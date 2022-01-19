@@ -123,6 +123,7 @@ class huxiuSpider(scrapy.Spider):
         title = response.xpath('//h1').xpath('string(.)').extract_first()
         content = ''
         pList = response.xpath('//div[@id="article-content"]/*')
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = p.xpath('string(.)').extract_first()
             if ('参考资料' in c or '参考链接' in c or '参考文献' in c):
@@ -139,7 +140,8 @@ class huxiuSpider(scrapy.Spider):
                             c = re.sub(u"（.*?化名）", "", c)
                         else:
                             pass
-                content = content + '<p>' + Cleaner_Paragraph().integratedOp(c) + '</p>'
+                c = cleaner_paragraph.integratedOp(c)
+                content = content + '<p>' + c + '</p>'
             if (p.xpath('.//img') != []):
                 for img in p.xpath('.//img'):
                     content = content + '<img src="' + img.xpath('./@_src').extract_first() + '"/>'

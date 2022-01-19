@@ -50,11 +50,13 @@ class aigupiaoSpider(scrapy.Spider):
         title = response.xpath('//h1/text()').extract_first()
         pList = response.xpath('//div[@class="newstextbox"]//div')[0].xpath(".//div[@class='init-photo-gallery news_content init-gallery']/*")
         content = ''
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = p.xpath('string(.)').extract_first()
             if (c != '' and '爱股票社区' not in c and '作者个人' not in c and '仅供参考' not in c and '笔者简介' not in c and '转载' not in c and '文章来源：' not in c
                 and '作者：' not in c and '来源：' not in c):
-                content = content + '<p>' + Cleaner_Paragraph().integratedOp(p.xpath('string(.)').extract_first()) + '</p>'
+                c = cleaner_paragraph.integratedOp(c)
+                content = content + '<p>' + c + '</p>'
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath(".//img"):
                     content = content + '<img src=\'' + img.xpath('./@src').extract_first() + '\' />'

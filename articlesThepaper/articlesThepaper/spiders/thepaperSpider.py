@@ -3,6 +3,7 @@ from fake_useragent import UserAgent
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 from .. import items
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 class ThepaperSpider(scrapy.Spider):
     name = 'thepaperSpider'
@@ -53,9 +54,10 @@ class ThepaperSpider(scrapy.Spider):
             if('分钟前' in publishTime or '小时前' in publishTime):
                 url_lis.append((title, url))
         for url in url_lis:
-            add_param = {}
-            add_param['title'] = url[0]
-            yield scrapy.Request(url=url[1], cookies=self.cookies, headers=self.headers, callback=self.parse_content, cb_kwargs=add_param)
+            if(Base_Identifier.is_intterrogative(url[0])):
+                add_param = {}
+                add_param['title'] = url[0]
+                yield scrapy.Request(url=url[1], cookies=self.cookies, headers=self.headers, callback=self.parse_content, cb_kwargs=add_param)
 
     def parse_content(self, response, title):
         content = ''
@@ -71,6 +73,7 @@ class ThepaperSpider(scrapy.Spider):
         articleItem = items.ArticleContentItem()
         if(paragraphList[-2] == hideword):
             paragraphList = paragraphList[:-2]
+        cleaner_paragraph = Cleaner_Paragraph()
         for paragraph in paragraphList:
             if(
                     paragraph!=hideword
@@ -79,7 +82,8 @@ class ThepaperSpider(scrapy.Spider):
                     and '（原题' not in paragraph and '（文中' not in paragraph and '（原标题' not in paragraph
                     and '（执业证书：' not in paragraph
             ):
-                content = content + '<p>' + Cleaner_Paragraph().integratedOp(paragraph) + '</p>'
+                c = cleaner_paragraph.integratedOp(paragraph)
+                content = content + '<p>' + c + '</p>'
                 if(imgsList):
                     content = content + '<img src=\'' + imgsList[0] + '\' />'
                     imgsList.pop(imgsList.index(imgsList[0]))

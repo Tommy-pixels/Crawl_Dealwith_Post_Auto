@@ -1,4 +1,5 @@
 import pymysql
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 class ArticlesPipeline:
     # 设置数据库
@@ -16,15 +17,16 @@ class ArticlesPipeline:
         content = item['content']
         if ('\"' in content):
             content = content.replace("\"", "\'")
-        try:
-            sql = "INSERT INTO `articledatabase`.`tb_article_xinhua_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
-                title,
-                content
-            )
-            self.cursor.execute(sql)
-        except Exception as e:
-            print(sql)
-        self.title_lis.append(title)
+        if (Base_Identifier.is_intterrogative(title)):
+            try:
+                sql = "INSERT INTO `articledatabase`.`tb_article_xinhua_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
+                    title,
+                    content
+                )
+                self.cursor.execute(sql)
+            except Exception as e:
+                print(sql)
+            self.title_lis.append(title)
         return item
 
     def close_spider(self, spider):

@@ -4,6 +4,7 @@ from fake_useragent import UserAgent
 from .. import items
 import execjs, re
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 # 获取当前日期
 def getCurDate(format="%Y%m%d"):
@@ -67,17 +68,19 @@ class NbdSpider(scrapy.Spider):
                 urlList.append((url, title))
 
         for url in urlList:
-            dic = {}
-            dic['title'] = title
-            yield scrapy.Request(
-                url='https://industry.cfi.cn/newspage.aspx?id={}'.format(url[0].split('.')[0].replace('p', '')),
-                headers=self.headers, cookies=self.cookies,
-                callback=self.parse_content,
-                cb_kwargs=dic
-            )
+            if (Base_Identifier.is_intterrogative(url[1])):
+                dic = {}
+                dic['title'] = url[1]
+                yield scrapy.Request(
+                    url='https://industry.cfi.cn/newspage.aspx?id={}'.format(url[0].split('.')[0].replace('p', '')),
+                    headers=self.headers, cookies=self.cookies,
+                    callback=self.parse_content,
+                    cb_kwargs=dic
+                )
 
     def parse_content(self, response, title):
         articleContentItem = items.ArticleContentItem()
+        cleaner_paragraph = Cleaner_Paragraph()
         try:
             # s = response.text.split('var nr{}="'.format(response.url.split('.')[1].split('.')[0]))[1].split('"')[0]
             s = response.text.split('var nr{}="'.format(response.url.split('.')[-1].split('=')[-1]))[1].split('"')[0]
@@ -105,7 +108,8 @@ class NbdSpider(scrapy.Spider):
                         and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
                         and '每经记者' not in c and ' 每经编辑' not in c and ' 每经评论员' not in c and '编辑' not in c and '校对' not in c and '封面图' not in c
                 ):
-                    content = content + '<p>' + Cleaner_Paragraph().integratedOp(c.replace('\n', '').replace(' ','').replace('\u3000', '')) + '</p>'
+                    c = cleaner_paragraph.integratedOp(c.replace('\n', '').replace(' ','').replace('\u3000', ''))
+                    content = content + '<p>' + c + '</p>'
                 if (img_lis != []):
                     content = content + '<img src=\'' + img_lis[0] + '\' />'
                     img_lis.pop(0)
@@ -130,12 +134,14 @@ class NbdSpider(scrapy.Spider):
                         imgsrc = 'https://img.cfi.cn/readpic.aspx?imageid=' + "".join(re.findall('\d+', p.split('<script>')[1].split('</script>')[0]))
                         c = re.sub(u"\\<script>.*?\\</script>", "", p).replace('\u3000', '')
                         if(c.replace('\r', '').replace('\n', '').replace('\u3000', '')!=''):
-                            content = content + '<p>' + Cleaner_Paragraph().integratedOp(re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', ''))) + '</p>' + '<img src=\'' + imgsrc + '\'/>'
+                            c = cleaner_paragraph.integratedOp(re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', '')))
+                            content = content + '<p>' + c + '</p>' + '<img src=\'' + imgsrc + '\'/>'
                         else:
                             content = content + '<img src=\'' + imgsrc + '\'/>'
                     else:
                         c = re.sub(u"\\<script>.*?\\</script>", "", p).replace('\u3000', '')
-                        content = content + '<p>' + Cleaner_Paragraph().integratedOp(re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', ''))) + '</p>'
+                        c = cleaner_paragraph.integratedOp(re.sub(u"\\<.*?\\>", "",c.replace('\r', '').replace('\n', '').replace('\u3000', '')))
+                        content = content + '<p>' + c + '</p>'
             except Exception as e:
                 pass
             articleContentItem['title'] = title_

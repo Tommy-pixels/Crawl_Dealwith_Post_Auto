@@ -3,6 +3,8 @@ from auto_datahandler.basement__.ContralerTime import Contraler_Time
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
 from fake_useragent import UserAgent
 from .. import items
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
+
 
 
 
@@ -69,25 +71,27 @@ class ChinaipoSpider(scrapy.Spider):
                     url_lis.append((title, article_url))
         cb_p = {}
         for article_item in url_lis:
-            cb_p['title'] = article_item[0]
-            self.headers['User-Agent'] = str(UserAgent().random)
-            yield scrapy.Request(
-                url=article_item[1],
-                headers=self.headers,
-                cookies=self.cookies,
-                callback=self.article_content,
-                cb_kwargs=cb_p
-            )
+            if (Base_Identifier.is_intterrogative(article_url[0])):
+                cb_p['title'] = article_item[0]
+                self.headers['User-Agent'] = str(UserAgent().random)
+                yield scrapy.Request(
+                    url=article_item[1],
+                    headers=self.headers,
+                    cookies=self.cookies,
+                    callback=self.article_content,
+                    cb_kwargs=cb_p
+                )
 
     def article_content(self, response, title):
         content = ''
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath('//div[@class="c-article__detail"]/*')
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
-
             c = "".join(p.xpath('string(.)').extract()).replace('\n','').replace('\r', '').replace('\t', '')
             if(c!='' and '来源:' not in c and '头图来源' not in c and '转载声明' not in c and '风险提示' not in c and '关键词'not in c and '声明：' not in c and '本文来源：' not in c):
-                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
+                c = cleaner_paragraph.integratedOp(c)
+                content = content + "<p>" + c + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

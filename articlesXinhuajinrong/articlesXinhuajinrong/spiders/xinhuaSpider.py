@@ -46,6 +46,7 @@ class XinhuaSpider(scrapy.Spider):
         pList = response.xpath("//div[@id='detail']/*[@id='detailContent']").xpath('./*')
         content = ''
         title = response.xpath('//h1').xpath('string(.)').extract_first()
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = p.xpath('string(.)').extract_first()
             if(c!=''):
@@ -54,7 +55,8 @@ class XinhuaSpider(scrapy.Spider):
                         c = c.replace(i, '')
                     else:
                         pass
-                content =  content + '<p>' + Cleaner_Paragraph().integratedOp(c) + '</p>'
+                c = cleaner_paragraph.integratedOp(c)
+                content =  content + '<p>' + c + '</p>'
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     content = content + '<img src=\'' + img.xpath('.//@src').extract_first() + '\'/>'

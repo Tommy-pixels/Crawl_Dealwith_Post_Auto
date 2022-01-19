@@ -2,6 +2,7 @@ import scrapy, time
 from .. import items
 from fake_useragent import UserAgent
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 
 def getSecondByDate(date):
@@ -65,25 +66,30 @@ class PedailySpider(scrapy.Spider):
                 articlelis.append((title, article_url))
         cb_p = {}
         for article_url in articlelis:
-            cb_p['title'] = article_url[0]
-            self.headers['Host'] = 'news.pedaily.cn'
-            self.headers['User-Agent'] = str(UserAgent().random)
-            yield scrapy.Request(
-                url=article_url[1],
-                headers=self.headers,
-                cookies=self.cookies,
-                callback=self.article_content,
-                cb_kwargs=cb_p
-            )
+            if (Base_Identifier.is_intterrogative(article_url[0])):
+                cb_p['title'] = article_url[0]
+                self.headers['Host'] = 'news.pedaily.cn'
+                self.headers['User-Agent'] = str(UserAgent().random)
+                yield scrapy.Request(
+                    url=article_url[1],
+                    headers=self.headers,
+                    cookies=self.cookies,
+                    callback=self.article_content,
+                    cb_kwargs=cb_p
+                )
 
     def article_content(self, response, title):
         content = ''
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath("//div[@id='news-content']/p")
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = "".join(p.xpath('string(.)').extract())
+            if('参考资料' in c):
+                break
             if(c!='' and '投资界原创' not in c):
-                content = content + "<p>" + Cleaner_Paragraph().integratedOp(c) + "</p>"
+                c = cleaner_paragraph.integratedOp(c)
+                content = content + "<p>" + c + "</p>"
             if(p.xpath('.//img')!=[]):
                 for img in p.xpath('.//img'):
                     imgsrc = img.xpath('.//@src').extract_first()

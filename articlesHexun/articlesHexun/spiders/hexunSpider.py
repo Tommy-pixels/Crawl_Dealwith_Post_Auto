@@ -53,6 +53,7 @@ class NbdSpider(scrapy.Spider):
         title = response.xpath('//h1')[0].xpath('string(.)').extract_first().replace('\n', '').replace(' ','')
         pList = response.xpath('//div[@class="art_contextBox"]/p')
         content = ''
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '')
             if ('扫描下方二维码' in c or '商报记者' in c):
@@ -61,7 +62,8 @@ class NbdSpider(scrapy.Spider):
                     and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
                     and '打开APP 阅读最新报道' not in c and '转载请注明' not in c and '责任编辑' not in c and '作者：'not in c and '附表：' not in c and '（作者' not in c
             ):
-                content = content + '<p>' + Cleaner_Paragraph().integratedOp(p.xpath('string(.)').extract_first().replace('\n', '').replace(' ','')) + '</p>'
+                c = cleaner_paragraph.integratedOp(c)
+                content = content + '<p>' + c + '</p>'
             if (p.xpath('.//img') != []):
                 for img in p.xpath(".//img"):
                     content = content + '<img src=\'' + img.xpath('./@src').extract_first() + '\' />'

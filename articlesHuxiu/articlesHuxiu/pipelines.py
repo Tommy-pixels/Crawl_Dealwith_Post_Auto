@@ -1,4 +1,5 @@
 import pymysql, time, re
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 # 获取当前日期
 def getCurDate():
@@ -32,12 +33,13 @@ class ArticlePipeline:
                 title,
                 content
             )
-            # 执行Sql语句
-            try:
-                self.cursor.execute(sql)
-            except Exception as e:
-                print("插入虎嗅网文章信息记录失败： ", sql)
-            self.title_lis.append(title)
+            if (Base_Identifier.is_intterrogative(title)):
+                # 执行Sql语句
+                try:
+                    self.cursor.execute(sql)
+                except Exception as e:
+                    print("插入虎嗅网文章信息记录失败： ", sql)
+                self.title_lis.append(title)
         else:
             return item
 

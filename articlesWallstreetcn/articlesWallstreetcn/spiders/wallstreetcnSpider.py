@@ -5,6 +5,7 @@ import bs4
 from .. import items
 from auto_datahandler.basement__.ContralerTime import Contraler_Time
 from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_Paragraph
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 
 class WallstreetcnSpider(scrapy.Spider):
@@ -74,10 +75,11 @@ class WallstreetcnSpider(scrapy.Spider):
                 url_list.append((title, url))
 
         for url in url_list:
-            self.headers['User-Agent'] = str(UserAgent().random)
-            add_param = {}
-            add_param['title'] = url[0]
-            yield scrapy.Request(url[1], callback=self.parse_articleContent, cb_kwargs=add_param)
+            if (Base_Identifier.is_intterrogative(url[0])):
+                self.headers['User-Agent'] = str(UserAgent().random)
+                add_param = {}
+                add_param['title'] = url[0]
+                yield scrapy.Request(url[1], callback=self.parse_articleContent, cb_kwargs=add_param)
 
 
     def parse_next(self,response):
@@ -92,10 +94,11 @@ class WallstreetcnSpider(scrapy.Spider):
                 url_list.append((title, url))
 
         for url in url_list:
-            self.headers['User-Agent'] = str(UserAgent().random)
-            add_param = {}
-            add_param['title'] = url[0]
-            yield scrapy.Request(url[1], callback=self.parse_articleContent, cb_kwargs=add_param)
+            if(Base_Identifier.is_intterrogative(url[0])):
+                self.headers['User-Agent'] = str(UserAgent().random)
+                add_param = {}
+                add_param['title'] = url[0]
+                yield scrapy.Request(url[1], callback=self.parse_articleContent, cb_kwargs=add_param)
 
     def parse_articleContent(self, response, title):
         articleItem = items.ArticleItem()
@@ -103,10 +106,12 @@ class WallstreetcnSpider(scrapy.Spider):
         soup = bs4.BeautifulSoup(article)
         p_lis = soup.find_all('p')
         content = ''
+        cleaner_paragraph = Cleaner_Paragraph()
         for p in p_lis:
             paragraph = p.text.replace(' ', '').replace('\n','').replace('\t','')
             if(paragraph):
-                content = content + '<p>' + Cleaner_Paragraph().integratedOp(p.text) + '</p>'
+                c = cleaner_paragraph.integratedOp(paragraph)
+                content = content + '<p>' + c + '</p>'
             try:
                 has_img = p.find('img')
             except Exception as e:

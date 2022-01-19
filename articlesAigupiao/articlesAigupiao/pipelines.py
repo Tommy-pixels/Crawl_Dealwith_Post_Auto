@@ -1,5 +1,6 @@
 import scrapy
 import pymysql
+from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
 
 class ArticleContentPipeline:
@@ -22,8 +23,9 @@ class ArticleContentPipeline:
             title,
             content
         )
-        self.title_lis.append(title)
-        self.cursor.execute(sql)
+        if (Base_Identifier.is_intterrogative(title)):
+            self.title_lis.append(title)
+            self.cursor.execute(sql)
         return item
 
     def close_spider(self, spider):
