@@ -1,7 +1,8 @@
 import pymysql
 from auto_datahandler.customFunction__.Identifier.base_identifier import Base_Identifier
 
-class ArticlesPipeline:
+
+class ArticlePipeline:
     # 设置数据库
     conn = pymysql.connect(
         host='localhost',
@@ -13,21 +14,27 @@ class ArticlesPipeline:
     cursor = conn.cursor()
     title_lis = []
     def process_item(self, item, spider):
-        title = item['title']
-        content = item['content']
-        if ('\"' in content):
-            content = content.replace("\"", "\'")
-        if (Base_Identifier.is_intterrogative(title)):
-            try:
-                sql = "INSERT INTO `articledatabase`.`tb_article_xinhua_content` (`title`, `content`) VALUES (\"{}\", \"{}\");".format(
-                    title,
-                    content
-                )
-                self.cursor.execute(sql)
+        if (spider.name == 'yingjia360Spider'):
+            title = item['title']
+            content = item['content']
+            if('\'' in content):
+                content = content.replace('\'', "\"")
+
+            sql = "INSERT INTO `articledatabase`.`tb_article_yingjia360_content` (`title`, `content`) VALUES (\'{}\',\'{}\');".format(
+                title,
+                content
+            )
+            if (Base_Identifier.is_intterrogative(title)):
+                # 执行Sql语句
+                try:
+                    self.cursor.execute(sql)
+                except Exception as e:
+                    print("插入赢家财富文章信息记录失败： ", sql)
                 self.title_lis.append(title)
-            except Exception as e:
-                print(sql)
-        return item
+            else:
+                print(title)
+        else:
+            return item
 
     def close_spider(self, spider):
         # 关闭数据库
@@ -41,4 +48,5 @@ class ArticlesPipeline:
         print("--文章title：")
         for title in self.title_lis:
             print('\t', title)
+
 

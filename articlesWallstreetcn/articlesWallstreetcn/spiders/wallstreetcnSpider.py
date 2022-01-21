@@ -109,6 +109,10 @@ class WallstreetcnSpider(scrapy.Spider):
         cleaner_paragraph = Cleaner_Paragraph()
         for p in p_lis:
             paragraph = p.text.replace(' ', '').replace('\n','').replace('\t','')
+            if (
+                '本文作者' in paragraph or '来源' in paragraph or '原文标题' in paragraph
+            ):
+                continue
             if(paragraph):
                 c = cleaner_paragraph.integratedOp(paragraph)
                 content = content + '<p>' + c + '</p>'
