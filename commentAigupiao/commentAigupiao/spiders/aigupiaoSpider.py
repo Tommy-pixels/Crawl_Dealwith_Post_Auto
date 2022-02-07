@@ -7,8 +7,10 @@ import time
 
 class AigupiaoSpider(scrapy.Spider):
     name = 'aigupiaoSpider'
+    GET_MD_URL = 'https://www.aigupiao8.com'
     start_url = 'https://www.aigupiao8.com/Api/LiveMsg/hot_msg?act=popular_content&source=pc&page={}&before_express_score=0'
-    API_COMMENT = 'https://www.aigupiao.com/index.php?s=/Api/Comment/comment_list&kind={}&id={}&md=c6eb7c89bf1ac28fc622bfffd228c35b&before={}'
+    md = ''
+    API_COMMENT = 'https://www.aigupiao.com/index.php?s=/Api/Comment/comment_list&kind={}&id={}&md={}&before={}'
     headers = {
         'Connection': 'close',
         'sec-ch-ua': '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
@@ -30,10 +32,21 @@ class AigupiaoSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        for i in range(1,7):
+        yield scrapy.Request(url=self.GET_MD_URL, headers=self.headers, cookies=self.cookies,callback=self.parse_md)
+
+
+    def parse_md(self, response):
+        """
+        获取md值,发起请求
+        :param response:
+        :return:
+        """
+        self.md = response.text.split(' md = "')[-1].split('";')[0]
+        for i in range(1, 7):
             time.sleep(2)
             self.headers['Host'] = 'www.aigupiao8.com'
             yield scrapy.Request(url=self.start_url.format(str(i)), headers=self.headers, cookies=self.cookies,callback=self.parse_info)
+
 
     def parse_info(self,response):
         json_data = json.loads(response.text)
@@ -49,7 +62,7 @@ class AigupiaoSpider(scrapy.Spider):
             self.headers['Origin'] = 'https://www.aigupiao8.com'
             dic = {}
             dic['msg_id'] = msg_id
-            yield scrapy.Request(url=self.API_COMMENT.format('live_msg', msg_id, ''), cookies=self.cookies, headers=self.headers,callback=self.parse_comment, cb_kwargs=dic)
+            yield scrapy.Request(url=self.API_COMMENT.format('live_msg', msg_id, self.md,''), cookies=self.cookies, headers=self.headers,callback=self.parse_comment, cb_kwargs=dic)
 
     def parse_comment(self, response, msg_id):
         commentItem = items.CommentItem()
@@ -73,4 +86,4 @@ class AigupiaoSpider(scrapy.Spider):
             self.headers['Origin'] = 'https://www.aigupiao8.com'
             dic = {}
             dic['msg_id'] = msg_id
-            yield scrapy.Request(url=self.API_COMMENT.format('live_msg', msg_id, before), cookies=self.cookies,headers=self.cookies,callback=self.parse_comment, cb_kwargs=dic)
+            yield scrapy.Request(url=self.API_COMMENT.format('live_msg', msg_id, self.md,before), cookies=self.cookies,headers=self.cookies,callback=self.parse_comment, cb_kwargs=dic)
