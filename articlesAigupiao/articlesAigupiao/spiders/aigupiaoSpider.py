@@ -37,7 +37,7 @@ class aigupiaoSpider(scrapy.Spider):
             publishTime = article.xpath(".//div[@class='foot1']//div[@class='time1']//text()").extract_first()
             if('日' in publishTime):
                 continue
-            url = 'https://www.aigupiao.com' + article.xpath(".//div[@class='title1']/a/@href").extract_first()
+            url = article.xpath(".//div[@class='title1']/a/@href").extract_first()
             if(url not in urlList):
                 urlList.append(url)
 

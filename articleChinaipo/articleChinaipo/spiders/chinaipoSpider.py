@@ -69,6 +69,7 @@ class ChinaipoSpider(scrapy.Spider):
             if(Contraler_Time.getCurDate(formatStr='%Y%m%d') == publish_time):
                 if((title, article_url) not in url_lis):
                     url_lis.append((title, article_url))
+                    print((title, article_url))
         cb_p = {}
         for article_item in url_lis:
             if (Base_Identifier.is_intterrogative(article_url[0])):

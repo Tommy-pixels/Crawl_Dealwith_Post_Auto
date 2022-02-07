@@ -55,6 +55,8 @@ class Yingjia360Spider(scrapy.Spider):
         uldiv_lis.pop(1)
         article_lis = []
         yesterday = int(getSecondByDate(getCurDate('%Y-%m-%d')))
+        # yesterday = int(getSecondByDate('2022-01-22'))
+
         curTime = int(round(time.time()))
         for uldiv in uldiv_lis:
             li_lis = uldiv.xpath('.//ul/li')
