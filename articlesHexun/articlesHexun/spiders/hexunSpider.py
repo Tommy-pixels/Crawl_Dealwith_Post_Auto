@@ -12,11 +12,11 @@ def getSecondByDate(date):
     b = time.strptime(date, '%Y%m%d %H:%M:%S')
     return time.mktime(b)
 
-class NbdSpider(scrapy.Spider):
+class HexunSpider(scrapy.Spider):
     name = 'hexunSpider'
-    start_url = 'http://news.hexun.com/domestic/'
+    start_url = 'http://stock.hexun.com/zibenguancha/index.html'
     headers = {
-        'Host': 'news.hexun.com',
+        'Host': 'stock.hexun.com',
         'Connection': 'close',
         'Cache-Control': 'max-age=0',
         'Upgrade-Insecure-Requests': '1',
@@ -36,15 +36,17 @@ class NbdSpider(scrapy.Spider):
         yield scrapy.Request(url=self.start_url, headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
 
     def parse_articleInfo(self, response):
-        li_lis = response.xpath('//div[@class="mainboxcontent"]/div')[1].xpath('./li')
+        ul_lis = response.xpath('//div[@class="stockul"]/div/ul')
         urlList = []
-        for article in li_lis:
-            publishTime = article.xpath('./span/text()').extract_first().split(' ')[0].replace('/','').replace('(', '')
-            if(publishTime!=getCurDate(format='%m%d')):
-                continue
-            url = article.xpath("./a/@href").extract_first()
-            if (url not in urlList):
-                urlList.append(url)
+        for ul in ul_lis:
+            li_lis = ul.xpath('./li')
+            for article in li_lis:
+                publishTime = article.xpath('./span/text()').extract_first().split(' ')[0].replace('/','').replace('(', '')
+                if(publishTime!=getCurDate(format='%m%d')):
+                    continue
+                url = article.xpath("./a/@href").extract_first()
+                if (url not in urlList):
+                    urlList.append(url)
         for url in urlList:
             yield scrapy.Request(url=url, headers=self.headers, cookies=self.cookies, callback=self.parse_content)
 
@@ -71,3 +73,4 @@ class NbdSpider(scrapy.Spider):
         articleContentItem['title'] = title
         articleContentItem['content'] = content
         yield articleContentItem
+
