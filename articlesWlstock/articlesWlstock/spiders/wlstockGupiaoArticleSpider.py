@@ -44,9 +44,11 @@ class WlstockGupiaoSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        self.headers['User-Agent'] = str(UserAgent().random)
-        body_data = 'channel=007005&pagesize=24&pageindex=1'
-        yield scrapy.Request(self.start_urls, headers=self.headers, cookies=self.cookies, body=body_data, method='Post',callback=self.parse_articleList)
+        channel_lis = ['007005', '007007']
+        for channel in channel_lis:
+            self.headers['User-Agent'] = str(UserAgent().random)
+            body_data = 'channel={}&pagesize=24&pageindex=1'.format(channel)
+            yield scrapy.Request(self.start_urls, headers=self.headers, cookies=self.cookies, body=body_data, method='Post',callback=self.parse_articleList)
 
     def parse_articleList(self, response):
         articleinfo_lis = json.loads(json.loads(response.text)['Data'])
@@ -66,7 +68,7 @@ class WlstockGupiaoSpider(scrapy.Spider):
 
     def parse_articleContent(self, response, title):
         articleItem = items.ArticleItem()
-        p_lis = response.xpath('//div[@class="article-bd-text"]/*')
+        p_lis = response.xpath('//div[@class="article-bd-text"]/p')
         content = ''
         cleaner_paragraph = Cleaner_Paragraph()
         for p in p_lis:
