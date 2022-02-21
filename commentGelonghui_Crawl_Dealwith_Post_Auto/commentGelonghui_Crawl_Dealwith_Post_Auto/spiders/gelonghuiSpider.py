@@ -111,7 +111,7 @@ class GelonghuiSpider(scrapy.Spider):
                 self.header['User-Agent'] = UserAgent().random
                 yield scrapy.Request(commentApiUrl, callback=self.parse_commentApi, cookies=self.cookie, headers=self.header)
             publishTime = articleData['createTimestamp']    # 当前文章发布时间
-        while(self.page <= 10):
+        while(self.page <= 30):
             self.page = self.page + 1
             self.start_url.format(str(self.page), self.version)
             time.sleep(2)

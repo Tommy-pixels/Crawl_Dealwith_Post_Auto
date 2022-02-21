@@ -33,7 +33,7 @@ class StockstarSpider(scrapy.Spider):
 		'Accept-Language': 'zh-CN,zh;q=0.9'
     }
     def start_requests(self):
-        for i in range(1, 18):
+        for i in range(1, 20):
             self.headers['User-Agent'] = str(UserAgent().random)
             yield scrapy.Request(url=self.start_url.format(str(i*5+2), str(i)), headers=self.headers, cookies=self.cookies, callback=self.parse_comment)
 

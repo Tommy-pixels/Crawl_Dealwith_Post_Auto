@@ -88,7 +88,7 @@ class GubaSpider(scrapy.Spider):
     def start_requests(self):
         getparamsInstance = GetParams_Selenium()
         self.cookies = getparamsInstance.get_params(url='http://guba.eastmoney.com')['cookies']
-        for i in range(1,12):
+        for i in range(1,30):
             self.headers = translate_Headers_Row2Obj(self.headersRom)
             self.headers['User-Agent'] = str(UserAgent().random)
             if(i%2 == 0):
