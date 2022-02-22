@@ -16,7 +16,7 @@ def getSecondByDate(date):
 
 class JiemianSpider(scrapy.Spider):
     name = 'jiemianSpider'
-    start_url = 'https://a.jiemian.com/index.php?m=newLists&a=loadMore&callback=jQuery110208336617447512662_1645432410522&tid=315&page={}&tpl=sub-list&repeat=7118479%2C7105964%2C7104124&list_type=&_=1645432410528'
+    start_url = 'https://a.jiemian.com/index.php?m=newLists&a=loadMore&callback=jQuery110208336617447512662_1645432410522&tid={}&page={}&tpl=sub-list&repeat=7118479%2C7105964%2C7104124&list_type=&_=1645432410528'
     headers = {
         'Connection': 'keep-alive',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -30,16 +30,18 @@ class JiemianSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        for i in range(1,2):
-            self.headers['Host'] = 'a.jiemian.com'
-            self.headers['Sec-Fetch-Site'] = 'same-site'
-            self.headers['Sec-Fetch-Mode'] = 'no-cors'
-            self.headers['Sec-Fetch-User'] = '?1'
-            self.headers['Sec-Fetch-Dest'] = 'script'
-            self.headers['Referer'] = 'https://www.jiemian.com/'
-            self.headers['Accept'] = '*/*'
-            self.headers['User-Agent'] = str(UserAgent().random)
-            yield scrapy.Request(url=self.start_url.format(str(i)), headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
+        tid_lis = ['1461', '525', '315']
+        for tid in tid_lis:
+            for i in range(1,2):
+                self.headers['Host'] = 'a.jiemian.com'
+                self.headers['Sec-Fetch-Site'] = 'same-site'
+                self.headers['Sec-Fetch-Mode'] = 'no-cors'
+                self.headers['Sec-Fetch-User'] = '?1'
+                self.headers['Sec-Fetch-Dest'] = 'script'
+                self.headers['Referer'] = 'https://www.jiemian.com/'
+                self.headers['Accept'] = '*/*'
+                self.headers['User-Agent'] = str(UserAgent().random)
+                yield scrapy.Request(url=self.start_url.format(tid, str(i)), headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
 
     def parse_articleInfo(self, response):
         start_char = response.text.find('{')
