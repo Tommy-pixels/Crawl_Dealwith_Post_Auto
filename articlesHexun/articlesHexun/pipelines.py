@@ -19,6 +19,8 @@ class ArticleContentPipeline:
         content = item['content']
         if('"' in content):
             content = content.replace('"', '\'')
+        if ('"' in title):
+            title = title.replace('"', '\'')
         elif ('（中新经纬APP）' in content):
             content = content.replace('（中新经纬APP）', '\'')
         elif('(中新经纬APP)' in content):

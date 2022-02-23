@@ -65,7 +65,10 @@ class HexunSpider(scrapy.Spider):
                     and '打开APP 阅读最新报道' not in c and '转载请注明' not in c and '责任编辑' not in c and '作者：'not in c and '附表：' not in c and '（作者' not in c
             ):
                 c = cleaner_paragraph.integratedOp(c)
-                content = content + '<p>' + c + '</p>'
+                if(int(len(c))<3):
+                    pass
+                else:
+                    content = content + '<p>' + c + '</p>'
             if (p.xpath('.//img') != []):
                 for img in p.xpath(".//img"):
                     content = content + '<img src=\'' + img.xpath('./@src').extract_first() + '\' />'
