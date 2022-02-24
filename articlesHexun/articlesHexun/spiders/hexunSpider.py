@@ -58,7 +58,7 @@ class HexunSpider(scrapy.Spider):
         cleaner_paragraph = Cleaner_Paragraph()
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '')
-            if ('扫描下方二维码' in c or '商报记者' in c):
+            if ('扫描下方二维码' in c or '商报记者' in c or '点击查看' in c):
                 break
             if (c != '' and '中新经纬摄' not in c and '来源：' not in c and '仅供参考' not in c and '编辑：' not in c
                     and '记者：' not in c and '声明：' not in c and '排版：' not in c and '视觉：' not in c and '封面：' not in c and '整理：' not in c
