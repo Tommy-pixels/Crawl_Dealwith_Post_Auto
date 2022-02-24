@@ -66,6 +66,8 @@ class YidianzixunSpider(scrapy.Spider):
         p_lis = response.xpath('//div[@class="content-bd"]/*')
         content = ''
         cleaner_paragraph = Cleaner_Paragraph()
+        if (p_lis[-1].xpath('.//img') != []):
+            p_lis = p_lis[:-1]
         for p in p_lis:
             paragraph = p.xpath('string(.)').extract_first().replace(' ', '').replace('\n','').replace('\t','')
             if (
@@ -73,7 +75,7 @@ class YidianzixunSpider(scrapy.Spider):
                     or '未经授权' in paragraph or '不得转载' in paragraph or ('记者' in paragraph and int(len(paragraph.replace('记者',''))<=10))
                     or ('报道' in paragraph and int(len(paragraph.replace('报道',''))<10)) or '文丨' in paragraph or '关注' in paragraph or '责编：' in paragraph
                     or '欢迎留言' in paragraph or '分钟阅读' in paragraph or '源自' in paragraph or '下载并参与' in paragraph or '应用商店搜索' in paragraph or '记者' in paragraph
-                    or '编辑' in paragraph
+                    or '编辑' in paragraph or '源：' in paragraph
             ):
                 continue
             if(paragraph):
