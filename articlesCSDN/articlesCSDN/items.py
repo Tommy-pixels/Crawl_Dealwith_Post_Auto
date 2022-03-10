@@ -8,5 +8,8 @@ class ArticleItem(scrapy.Item):
     url = scrapy.Field()
     crawl_time = scrapy.Field()
 
+class ArticleContentItem(scrapy.Item):
+    content = scrapy.Field()
+
 
 
