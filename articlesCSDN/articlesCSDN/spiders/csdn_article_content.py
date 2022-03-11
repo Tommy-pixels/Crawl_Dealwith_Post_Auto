@@ -82,7 +82,7 @@ class CSDNSpider(scrapy.Spider):
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')
         print(id_a, 'pLi==', len(pList))
-        if(len(pList)==1):
+        if(len(pList)<=2):
             pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')
             print(id_a, ' now pLi==', len(pList))
 
@@ -133,7 +133,7 @@ class CSDNSpider(scrapy.Spider):
                 or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c ):
                 break
             # 4.1 需要跳过的
-            lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：']
+            lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：','重金招聘']
             check = False
             for i_continue in lis_continue:
                 if(i_continue in c):
