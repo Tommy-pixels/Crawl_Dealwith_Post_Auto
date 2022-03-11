@@ -57,10 +57,10 @@ class CSDNSpider(scrapy.Spider):
 
     def start_requests(self):
         sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article`;'
-        sql_ = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` where content='' and `note` is Null `and` id<\'1000\';'
+        sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`<1000;"
         self.db.cursor.execute(sql_)
         article_lis = self.db.cursor.fetchall()
-        article_lis = article_lis[0:999]
+        # article_lis = article_lis[0:999]
         for article in article_lis:
             id_a = article[0]
             url = article[1]
