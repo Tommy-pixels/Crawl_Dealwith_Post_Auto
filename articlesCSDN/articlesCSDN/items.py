@@ -10,6 +10,7 @@ class ArticleItem(scrapy.Item):
 
 class ArticleContentItem(scrapy.Item):
     content = scrapy.Field()
+    id_a = scrapy.Field()
 
 
 

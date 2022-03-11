@@ -15,26 +15,44 @@ class ArticlePipeline:
     cursor = conn.cursor()
     title_lis = []
     def process_item(self, item, spider):
-        title = item['title']
-        # article_id = item['article_id']
-        create_time = item['create_time']
-        url = item['url']
-        crawl_time = item['crawl_time']
-        sql = "INSERT INTO `dbfreeh`.`tb_article` (`ori_url`, `title`, `content`, `publish_time`, `crawl_time`, `site`, `classification`) VALUES (\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\");".format(
-            url, title, '', create_time, crawl_time, 'CSDN', '新数据池系统'
-        )
-        _url = url.split('?')[0]
-        try:
-            self.cursor.execute('SELECT * FROM `dbfreeh`.`tb_article` WHERE `ori_url` like \'{}%\';'.format(_url))
-            res = self.cursor.fetchall()
-            if (not res):
+        print(spider.name)
+        if(spider.name != 'csdnarticleSpider'):
+            print('not csdnarticleSpider')
+            title = item['title']
+            # article_id = item['article_id']
+            create_time = item['create_time']
+            url = item['url']
+            crawl_time = item['crawl_time']
+            sql = "INSERT INTO `dbfreeh`.`tb_article` (`ori_url`, `title`, `content`, `publish_time`, `crawl_time`, `site`, `classification`) VALUES (\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\");".format(
+                url, title, '', create_time, crawl_time, 'CSDN', '新数据池系统'
+            )
+            _url = url.split('?')[0]
+            try:
+                self.cursor.execute('SELECT * FROM `dbfreeh`.`tb_article` WHERE `ori_url` like \'{}%\';'.format(_url))
+                res = self.cursor.fetchall()
+                if (not res):
+                    self.cursor.execute(sql)
+                else:
+                    print('存在 {}, {}'.format(title,res))
+            except Exception as e:
+                print(sql)
+            self.title_lis.append(title)
+            return item
+        else:
+            print('is csdnarticleSpider')
+            content = item['content']
+            if ('"' in content):
+                content = content.replace('"', '\'')
+            id_a = item['id_a']
+            sql = "UPDATE `dbfreeh`.`tb_article` SET `content`= \"{}\" WHERE (`id`=\"{}\");".format(
+                content, id_a
+            )
+            try:
                 self.cursor.execute(sql)
-            else:
-                print('存在 {}, {}'.format(title,res))
-        except Exception as e:
-            print(sql)
-        self.title_lis.append(title)
-        return item
+            except Exception as e:
+                print('更新content: ', sql)
+            self.title_lis.append(id_a)
+            return item
 
     def close_spider(self, spider):
         # 关闭数据库
