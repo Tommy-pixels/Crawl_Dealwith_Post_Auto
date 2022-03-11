@@ -78,6 +78,8 @@ class CSDNSpider(scrapy.Spider):
     def parse_content(self, response, id_a):
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')
+        if(len(pList)==1):
+            pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/div/*')
         content = ''
         cleaner_paragraph = Cleaner_Paragraph()
         # 判断文章是否vip文章或是专栏文章
