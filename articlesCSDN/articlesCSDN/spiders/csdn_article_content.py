@@ -69,6 +69,9 @@ class CSDNSpider(scrapy.Spider):
                 # 打标签
                 self.db.cursor.execute(self.UPDATE_NOTE.format('下载页面', id_a))
                 continue
+            elif('ask.csdn.net' in url):
+                self.db.cursor.execute(self.UPDATE_NOTE.format('回答页面', id_a))
+                continue
             self.headers['User-Agent'] = str(UserAgent().random)
             dic = {}
             dic['id_a'] = id_a
@@ -78,8 +81,10 @@ class CSDNSpider(scrapy.Spider):
     def parse_content(self, response, id_a):
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')
+        print(id_a, 'pLi==', len(pList))
         if(len(pList)==1):
             pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')
+            print(id_a, ' now pLi==', len(pList))
 
         content = ''
         cleaner_paragraph = Cleaner_Paragraph()
