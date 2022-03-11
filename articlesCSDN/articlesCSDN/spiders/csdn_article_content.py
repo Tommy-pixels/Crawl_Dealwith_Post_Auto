@@ -84,6 +84,9 @@ class CSDNSpider(scrapy.Spider):
         print(id_a, 'pLi==', len(pList))
         if(len(pList)<=2):
             pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')
+            if(len(pList)==1):
+                pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')[0].xpath('./*')
+
             print(id_a, ' now pLi==', len(pList))
 
         content = ''
