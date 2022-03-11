@@ -72,6 +72,9 @@ class CSDNSpider(scrapy.Spider):
             elif('ask.csdn.net' in url):
                 self.db.cursor.execute(self.UPDATE_NOTE.format('回答页面', id_a))
                 continue
+            elif ('category_' in url):
+                self.db.cursor.execute(self.UPDATE_NOTE.format('列表页面', id_a))
+                continue
             self.headers['User-Agent'] = str(UserAgent().random)
             dic = {}
             dic['id_a'] = id_a
