@@ -162,7 +162,7 @@ class CSDNSpider(scrapy.Spider):
                 break
             # 4.1 需要跳过的
             lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：','重金招聘',
-                            '转自公众号', '转载自', '目录', '前言']
+                            '转自公众号', '转载自', '目录', '前言', '浏览量：', '匿名', '作者:']
             check = False
             for i_continue in lis_continue:
                 if(i_continue in c):
