@@ -56,9 +56,9 @@ class CSDNSpider(scrapy.Spider):
     UPDATE_NOTE = "UPDATE `tb_article` SET `note` = '{}' WHERE (`id` = '{}');"
 
     def start_requests(self):
-        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article`;'
-        sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`<1000;"
-        self.db.cursor.execute(sql_)
+        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `id`>1000 and `id`<2000;'
+        # sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`>1037 and `id`<2000;"
+        self.db.cursor.execute(sql_origin)
         article_lis = self.db.cursor.fetchall()
         # article_lis = article_lis[0:999]
         for article in article_lis:
@@ -85,12 +85,29 @@ class CSDNSpider(scrapy.Spider):
         articleContentItem = items.ArticleContentItem()
         pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')
         print(id_a, 'pLi==', len(pList))
-        if(len(pList)<=2):
+        if(len(pList)<2):
             pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')
             if(len(pList)==1):
                 pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')[0].xpath('./*')
-
+                if(len(pList)==1):
+                    pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')[0].xpath('./*')[0].xpath('./*')
+                    if (len(pList) == 1):
+                        pList = response.xpath(
+                            '//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[
+                            0].xpath('./*')[0].xpath('./*')[0].xpath('./*')[0].xpath('./*')
             print(id_a, ' now pLi==', len(pList))
+        elif(len(pList)==2 and 'svg' in pList[0].extract()):
+            pList = response.xpath(
+                '//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[
+                1].xpath('./*')
+            if(len(pList) == 1):
+                pList = response.xpath(
+                    '//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[1].xpath('./*')[0].xpath('./*')
+        elif (len(pList) == 2):
+            print('2222222')
+            pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[0].xpath('./*')
+            if(len(pList) == 1):
+                pList = response.xpath('//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]/*')[1].xpath('./*')[0].xpath('./*')
 
         content = ''
         cleaner_paragraph = Cleaner_Paragraph()
@@ -129,17 +146,23 @@ class CSDNSpider(scrapy.Spider):
                 if(len(c)!=0 and _str_check(c)):
                     pList.pop(pList.index(i))
 
-        # 4 内容提取
+        # 4 清目录
+        for i in pList[0:40]:
+            if (i.xpath('./a') and 'href="#' in i.extract() or  '<hr id="hr-toc"' in i.extract()):
+                pList.pop(pList.index(i))
+
+        # 5 内容提取
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '').replace('\xa0','').replace('\r','').replace('\n','').replace('\t','')
             # 指定内容才筛选链接
             if(0<len(c)<80 and _str_check(c)):
                 continue
             if ('版权说明' in c or '下面二维码' in c or '可关注微信公众号' in c or '微信公众号' in c or '邮箱地址' in c or '请关注公众号' in c or '相关系列：' in c
-                or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c ):
+                or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6)):
                 break
             # 4.1 需要跳过的
-            lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：','重金招聘']
+            lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：','重金招聘',
+                            '转自公众号', '转载自', '目录', '前言']
             check = False
             for i_continue in lis_continue:
                 if(i_continue in c):
@@ -165,7 +188,7 @@ class CSDNSpider(scrapy.Spider):
                 content = content + '<p>' + c + '</p>'
             if(p.xpath('.//img') != []):
                 for img in p.xpath(".//img"):
-                    content = content + "<img src='" + img.xpath('./@src').extract_first() + "' />"
+                    content = content + "<img src='http://119.23.244.126/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
         articleContentItem['id_a'] = id_a
         articleContentItem['content'] = content
         yield articleContentItem
