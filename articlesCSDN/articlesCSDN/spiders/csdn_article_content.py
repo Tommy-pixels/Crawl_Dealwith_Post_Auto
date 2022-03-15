@@ -158,11 +158,12 @@ class CSDNSpider(scrapy.Spider):
             if(0<len(c)<80 and _str_check(c)):
                 continue
             if ('版权说明' in c or '下面二维码' in c or '可关注微信公众号' in c or '微信公众号' in c or '邮箱地址' in c or '请关注公众号' in c or '相关系列：' in c
-                or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6)):
+                or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6) or '往期推荐' in c):
                 break
             # 4.1 需要跳过的
             lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：','重金招聘',
-                            '转自公众号', '转载自', '目录', '前言', '浏览量：', '匿名', '作者:']
+                            '转自公众号', '转载自', '目录', '前言', '浏览量：', '匿名', '作者:', '编辑：', '扫码关注', '文章推荐', '关注回复', '禁止转载', '本文由', '题来自', '点击上方',
+                            '转自：', '点个赞+', '链接：']
             check = False
             for i_continue in lis_continue:
                 if(i_continue in c):
