@@ -1,7 +1,8 @@
 import scrapy
 import json, time
 from ..tools import getSecondByFormat, randomSleep
-from ..items import CommentItem, ArticleItem
+from ..items import CommentItem
+from fake_useragent import UserAgent
 
 class quote1Spider(scrapy.Spider):
     name = "comment1Spider"   # 存放淘股吧7*24讨论（https://www.taoguba.com.cn/quotes/）评论内容
@@ -23,7 +24,7 @@ class quote1Spider(scrapy.Spider):
             Accept-Encoding: gzip, deflate, br
             Accept-Language: zh-CN,zh;q=0.9
         """
-    cookieStr = "acw_tc=0bde430616359884674927409e0141e395803eecc595be4f34b9665fa6e44b; JSESSIONID=fcdb4127-40bd-40da-8eba-3c0e38af158a; UM_distinctid=17ce882f718e2f-0f7dbe70040c49-6373264-1fa400-17ce882f719775; CNZZDATA1574657=cnzz_eid%3D1664214953-1635982895-%26ntime%3D1635982895; Hm_lvt_cc6a63a887a7d811c92b7cc41c441837=1635988470; Hm_lpvt_cc6a63a887a7d811c92b7cc41c441837=1635988470; agree=enter"
+    cookieStr = "acw_tc=0bde430616359884674927409e0141e395803eecc595be4f34b9665fa6e44b; JSESSIONID=fcdb4127-40bd-40da-8eba-3c0e38af158aJSESSIONID=95ccef99-e071-4a27-af6f-018ff1695f13; UM_distinctid=17f8b5a51a6119-067ab594e3587a-6373264-1fa400-17f8b5a51a7ebd; Hm_lvt_cc6a63a887a7d811c92b7cc41c441837=1647308437; Hm_lpvt_cc6a63a887a7d811c92b7cc41c441837=1647310427; CNZZDATA1574657=cnzz_eid%3D1913154371-1647300210-https%253A%252F%252Fcn.bing.com%252F%26ntime%3D1647300210"
 
 
     def start_requests(self):
@@ -35,6 +36,7 @@ class quote1Spider(scrapy.Spider):
                 k = i[0]
                 v = i[1]
                 self.header[k] = v
+        self.header['User-Agent'] = UserAgent().random
         cookieList = self.cookieStr.split(";")
         self.cookie = {}
         for cookieItem in cookieList:
@@ -60,15 +62,29 @@ class quote1Spider(scrapy.Spider):
         for i in lis:
             if('reply_' not in i.xpath(".//@id").extract_first()):
                 continue
-            comment = i.xpath(".//div[@class='pcnr_wz']").xpath("string()").extract_first().strip()
+            comment_lis = i.xpath(".//div[@class='pcnr_wz']/*")
+            if(len(comment_lis)==2):
+                comment = comment_lis[0].xpath("string()").extract_first().strip().replace('\n','').replace(' ','')
+            else:
+                comment = comment_lis.xpath("string()").extract_first().strip().replace('\n', '').replace(' ', '')
             if('#' in comment or '$' in comment or '@' in comment):
-                continue
-            publishTime = i.xpath(".//div[@class='pc_yc_an']//div[@class='left pcyc_l']/span")[-1].xpath("string()").extract_first().strip() + ":00"
+                a_tag_str_lis = i.xpath(".//div[@class='pcnr_wz']//a")
+                for li in a_tag_str_lis:
+                    comment = comment.replace(li.xpath("string()").extract_first().strip(), '')
+            if(comment.startswith(':') or comment.startswith('：') or comment.startswith('，') or comment.startswith(',')):
+                comment = comment[1:]
+            t_lis = ['～']
+            for m in t_lis:
+                comment = comment.replace(m,' ')
+            publishTime = i.xpath(".//div[@class='user-data-time left']/span")[-1].xpath("string()").extract_first().strip() + ":00"
             publishTime = getSecondByFormat(publishTime, formatStr='%Y-%m-%d %H:%M:%S') * 1000
             commentItem['comment'] = comment
             commentItem['publishTime'] = publishTime
             yield commentItem
-        if(self.times<5):
+
+
+
+        if(self.times<10):
             self.times = self.times + 1
             yield scrapy.Request(url=self.start_url.format(self.times), cookies=self.cookie, headers=self.header, callback=self.parse)
             randomSleep(10)
