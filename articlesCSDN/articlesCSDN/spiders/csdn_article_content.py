@@ -5,7 +5,7 @@ from auto_datahandler.customFunction__.Cleaner.cleaner_paragraph import Cleaner_
 from auto_datahandler.basement__.IsCheck import IsCheck_uchar
 from auto_datahandler.basement__.ContralerDatabase import Contraler_Database
 import re
-
+import urllib.request
 """CSDN 文章内容过滤规则
     过滤uri
 """
@@ -56,7 +56,7 @@ class CSDNSpider(scrapy.Spider):
     UPDATE_NOTE = "UPDATE `tb_article` SET `note` = '{}' WHERE (`id` = '{}');"
 
     def start_requests(self):
-        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `id`>1000 and `id`<2000;'
+        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `id`>8000 and `id`<9000;'
         # sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`>1037 and `id`<2000;"
         self.db.cursor.execute(sql_origin)
         article_lis = self.db.cursor.fetchall()
@@ -155,7 +155,7 @@ class CSDNSpider(scrapy.Spider):
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '').replace('\xa0','').replace('\r','').replace('\n','').replace('\t','')
             # 指定内容才筛选链接
-            if(0<len(c)<80 and _str_check(c)):
+            if((0<len(c)<80 and _str_check(c)) or len(c)<=2):
                 continue
             if ('版权说明' in c or '下面二维码' in c or '可关注微信公众号' in c or '微信公众号' in c or '邮箱地址' in c or '请关注公众号' in c or '相关系列：' in c
                 or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6) or '往期推荐' in c):
@@ -163,7 +163,8 @@ class CSDNSpider(scrapy.Spider):
             # 4.1 需要跳过的
             lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：','重金招聘',
                             '转自公众号', '转载自', '目录', '前言', '浏览量：', '匿名', '作者:', '编辑：', '扫码关注', '文章推荐', '关注回复', '禁止转载', '本文由', '题来自', '点击上方',
-                            '转自：', '点个赞+', '链接：']
+                            '转自：', '点个赞+', '链接：','参考资料：', '请关注：', '关注：','微信号：', '部分内容参考自', '[关于我们]','说明：', '星标公众号','请参看我','点击关注','作者|',
+                            '来源|', '戳进去领取','加我微信', '关注我们', '未经允许','原文链接','点在看','出品|','编译|','责编|','阅读原文','更多精彩','参考资料','相关的资料链接戳这里']
             check = False
             for i_continue in lis_continue:
                 if(i_continue in c):
@@ -189,7 +190,9 @@ class CSDNSpider(scrapy.Spider):
                 content = content + '<p>' + c + '</p>'
             if(p.xpath('.//img') != []):
                 for img in p.xpath(".//img"):
-                    content = content + "<img src='http://119.23.244.126/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
+                    src = img.xpath('./@src').extract_first()
+                    if(src):
+                        content = content + "<img src='http://119.23.244.126/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
         articleContentItem['id_a'] = id_a
         articleContentItem['content'] = content
         yield articleContentItem
