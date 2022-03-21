@@ -56,7 +56,7 @@ class CSDNSpider(scrapy.Spider):
     UPDATE_NOTE = "UPDATE `tb_article` SET `note` = '{}' WHERE (`id` = '{}');"
 
     def start_requests(self):
-        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `id`>8000 and `id`<9000;'
+        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`>2000 and `id`<3000) and (`note` is null or `note`="");'
         # sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`>1037 and `id`<2000;"
         self.db.cursor.execute(sql_origin)
         article_lis = self.db.cursor.fetchall()
@@ -155,7 +155,7 @@ class CSDNSpider(scrapy.Spider):
         for p in pList:
             c = p.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '').replace('\xa0','').replace('\r','').replace('\n','').replace('\t','')
             # 指定内容才筛选链接
-            if((0<len(c)<80 and _str_check(c)) or len(c)<=2):
+            if((0<len(c)<80 and _str_check(c)) or 0<len(c)<=2 or (len(c)==0 and p.xpath('.//img') == [])):
                 continue
             if ('版权说明' in c or '下面二维码' in c or '可关注微信公众号' in c or '微信公众号' in c or '邮箱地址' in c or '请关注公众号' in c or '相关系列：' in c
                 or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6) or '往期推荐' in c):
@@ -164,7 +164,8 @@ class CSDNSpider(scrapy.Spider):
             lis_continue = ['本分享为', 'QQ交流群', '更多分享', '作者：', '来源：', '原文：', '版权声明：', '文章出自', '公众号：', '抖音号：', '版权声明：','原文链接：','重金招聘',
                             '转自公众号', '转载自', '目录', '前言', '浏览量：', '匿名', '作者:', '编辑：', '扫码关注', '文章推荐', '关注回复', '禁止转载', '本文由', '题来自', '点击上方',
                             '转自：', '点个赞+', '链接：','参考资料：', '请关注：', '关注：','微信号：', '部分内容参考自', '[关于我们]','说明：', '星标公众号','请参看我','点击关注','作者|',
-                            '来源|', '戳进去领取','加我微信', '关注我们', '未经允许','原文链接','点在看','出品|','编译|','责编|','阅读原文','更多精彩','参考资料','相关的资料链接戳这里']
+                            '来源|', '戳进去领取','加我微信', '关注我们', '未经允许','原文链接','点在看','出品|','编译|','责编|','阅读原文','更多精彩','参考资料','相关的资料链接戳这里','作者/',
+                            '|知乎','|博客']
             check = False
             for i_continue in lis_continue:
                 if(i_continue in c):
