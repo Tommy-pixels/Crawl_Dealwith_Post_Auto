@@ -98,7 +98,7 @@ class CSDNSpider(scrapy.Spider):
             articleContentItem['id_a'] = id_a
             articleContentItem['content'] = content
             yield articleContentItem
-        elif(len(special)>2):
+        elif(len(special)>2 and '转载于' in ''.join(special)):
             content = ''
             for p in special:
                 c = cleaner_paragraph.integratedOp(p)
@@ -200,7 +200,7 @@ class CSDNSpider(scrapy.Spider):
                                 '转自：', '点个赞+', '链接：','参考资料：', '请关注：', '关注：','微信号：', '部分内容参考自', '[关于我们]','说明：', '星标公众号','请参看我','点击关注','作者|',
                                 '来源|', '戳进去领取','加我微信', '关注我们', '未经允许','原文链接','点在看','出品|','编译|','责编|','阅读原文','更多精彩','参考资料','相关的资料链接戳这里','作者/',
                                 '|知乎','|博客','交流群','转发吧','点“在看”','文末福利', '免费获取','文/', 'CSDN编者','作者介绍','头|','CSDN：','扫描上方二维码','点击','作者｜', '转自'
-                                '校对｜','微信群','关注']
+                                '校对｜','微信群','关注', '转载']
                 check = False
                 for i_continue in lis_continue:
                     if(i_continue in c):
