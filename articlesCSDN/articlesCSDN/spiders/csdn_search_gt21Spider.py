@@ -18,7 +18,7 @@ class CSDNSpider(scrapy.Spider):
         'Sec-Fetch-Site': 'cross-site',
         'Sec-Fetch-Mode': 'no-cors',
         'Sec-Fetch-Dest': 'script',
-        'Referer': 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&s=0&lv=5&tm=0',
+        'Referer': 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&vco=1&s=0&lv=5&tm=0',
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept-Language': 'zh-CN,zh;q=0.9'
     }
@@ -26,16 +26,19 @@ class CSDNSpider(scrapy.Spider):
         'BAIDUID_BFESS':'D458AC18B8D6743CBCF03D93C5C57D02:FG=1'
     }
     def start_requests(self):
+        """
+            vco 1 vip文章
+        """
         li_dic_lis = [
-            # {'s':'new', 'lv': '5', 'tm' : '0'},
-            # {'s':'new', 'lv': '5', 'tm': '7'},
-            {'s':'new', 'lv': '5', 'tm': '30'},
-            # {'s':'new', 'lv': '5', 'tm': '90'},
-            # {'s':'new', 'lv': '5', 'tm': '365'},
+            {'vco':'1', 's':'new', 'lv': '4', 'tm' : '0'},
+            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '7'},
+            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '30'},
+            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '90'},
+            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '365'},
         ]
         for dic in li_dic_lis:
             for i in range(0, 50):
-                self.headers['Referer'] = 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&s={}&lv={}&tm={}'.format(dic['s'], dic['lv'], dic['tm'])
+                self.headers['Referer'] = 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&vco={}&s={}&lv={}&tm={}'.format(dic['vco'], dic['s'], dic['lv'], dic['tm'])
                 self.headers['User-Agent'] = str(UserAgent().random)
                 yield scrapy.Request(url=self.start_url.format(str(i)), headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
                 time.sleep(5)
