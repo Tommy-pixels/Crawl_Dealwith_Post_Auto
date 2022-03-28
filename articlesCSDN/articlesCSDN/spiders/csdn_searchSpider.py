@@ -6,7 +6,10 @@ import json
 
 class CSDNSpider(scrapy.Spider):
     name = 'csdnSpider'
-    start_url = 'https://so.csdn.net/api/v3/search?q=%E6%8E%A5%E5%8F%A3&t=all&p={}&s=new&tm=365&lv=5&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=-1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&ia=1&cl=-1&scl=-1&tcl=-1&platform=pc'
+    '''
+    vip文章 vco=1
+    '''
+    start_url = 'https://so.csdn.net/api/v3/search?q=%E6%8E%A5%E5%8F%A3&t=all&p={}&s=new&tm={}&lv={}&ft=0&l=&u=&ct=-1&pnt=-1&ry=-1&ss=-1&dct=-1&vco=1&cc=-1&sc=-1&akt=-1&art=-1&ca=-1&prs=&pre=&ecc=-1&ebc=-1&ia=1&cl=-1&scl=-1&tcl=-1&platform=pc'
     headers = {
         'Host': 'so.csdn.net',
         'Connection': 'close',
@@ -17,7 +20,7 @@ class CSDNSpider(scrapy.Spider):
         'Sec-Fetch-Site': 'same-origin',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Dest': 'empty',
-        'Referer': 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&s=new&lv=5&tm=365',
+        'Referer': 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&s=new&lv={}&tm={}',
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept-Language': 'zh-CN,zh;q=0.9'
     }
@@ -32,10 +35,19 @@ class CSDNSpider(scrapy.Spider):
         }
 
     def start_requests(self):
-        for i in range(0, 21):
-            self.headers['User-Agent'] = str(UserAgent().random)
-            yield scrapy.Request(url=self.start_url.format(str(i)), headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
-            time.sleep(1)
+        li_dic_lis = [
+            # {'lv': '2', 'tm' : '0'},
+            {'lv': '2', 'tm': '7'},
+            # {'lv': '2', 'tm': '30'},
+            # {'lv': '2', 'tm': '90'},
+            # {'lv': '2', 'tm': '365'},
+        ]
+        for dic in li_dic_lis:
+            for i in range(0, 21):
+                self.headers['Referer'] = 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&s=new&lv={}&tm={}'.format(dic['lv'], dic['tm'])
+                self.headers['User-Agent'] = str(UserAgent().random)
+                yield scrapy.Request(url=self.start_url.format(str(i), dic['tm'], dic['lv']), headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
+                time.sleep(2)
 
     def parse_articleInfo(self, response):
         li_lis = json.loads(response.text)['result_vos']

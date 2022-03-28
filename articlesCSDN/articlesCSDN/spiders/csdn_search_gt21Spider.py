@@ -26,10 +26,19 @@ class CSDNSpider(scrapy.Spider):
         'BAIDUID_BFESS':'D458AC18B8D6743CBCF03D93C5C57D02:FG=1'
     }
     def start_requests(self):
-        for i in range(0, 50):
-            self.headers['User-Agent'] = str(UserAgent().random)
-            yield scrapy.Request(url=self.start_url.format(str(i)), headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
-            time.sleep(5)
+        li_dic_lis = [
+            # {'s':'new', 'lv': '5', 'tm' : '0'},
+            # {'s':'new', 'lv': '5', 'tm': '7'},
+            {'s':'new', 'lv': '5', 'tm': '30'},
+            # {'s':'new', 'lv': '5', 'tm': '90'},
+            # {'s':'new', 'lv': '5', 'tm': '365'},
+        ]
+        for dic in li_dic_lis:
+            for i in range(0, 50):
+                self.headers['Referer'] = 'https://so.csdn.net/so/search?q=%E6%8E%A5%E5%8F%A3&t=all&u=&s={}&lv={}&tm={}'.format(dic['s'], dic['lv'], dic['tm'])
+                self.headers['User-Agent'] = str(UserAgent().random)
+                yield scrapy.Request(url=self.start_url.format(str(i)), headers=self.headers, cookies=self.cookies, callback=self.parse_articleInfo)
+                time.sleep(5)
 
     def parse_articleInfo(self, response):
         li_lis = json.loads(response.text[42:-1])['blockData']
