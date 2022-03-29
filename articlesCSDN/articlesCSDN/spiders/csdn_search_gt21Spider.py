@@ -30,11 +30,11 @@ class CSDNSpider(scrapy.Spider):
             vco 1 vip文章
         """
         li_dic_lis = [
-            {'vco':'1', 's':'new', 'lv': '4', 'tm' : '0'},
-            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '7'},
-            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '30'},
-            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '90'},
-            # {'vco':'1', 's':'new', 'lv': '4', 'tm': '365'},
+            # {'vco':'1', 's':'new', 'lv': '5', 'tm' : '0'},
+            # {'vco':'1', 's':'new', 'lv': '5', 'tm': '7'},
+            # {'vco':'1', 's':'new', 'lv': '5', 'tm': '30'},
+            {'vco':'1', 's':'new', 'lv': '5', 'tm': '90'},
+            # {'vco':'1', 's':'new', 'lv': '5', 'tm': '365'},
         ]
         for dic in li_dic_lis:
             for i in range(0, 50):

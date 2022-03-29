@@ -52,12 +52,23 @@ class CSDNSpider(scrapy.Spider):
         'Referer':'https://blog.csdn.net/'
     }
     cookies = {
+        'UserToken':'7f099f1c57dc4e86ba3b84f7f1dd2e7b;dc_sid=6560bd77106d2cd7f9bdbccea99554fd',
+        'Hm_ct_6bcd52f51e9b3dce32bec4a3997715ac':'6525*1*10_19005485070-1648535210468-180676!5744*1*weixin_44628105',
+        'firstDie':'1',
+        'hide_login':'1',
+        'SESSION':'296902d5-bfbc-4447-81e8-431b84f60ff6',
+        'ssxmod_itna':'Yq0xyD0D9D2DuGKQGHD8AQapDf225C7fQWInI7DBwhk4iNDnD8x7YDvIIyiIK+BGBGfGtbxYvsje+GaRI517iauzqIDB3DEx0=5HOCPiiyDCeDIDWeDiDG4GmB4GtDpxG=Djjtz1M6xYPDEjKDaxDbDin8pxGCDeKD0PwFDQKDu6I4ijK+82Y1W3vqYRDqLxG1F40HCA34Lxgf6+GzYt8EuQGxDBRNMRD4Yjdx1BiGfWKDXpQDvO51M2PpMSKsyPANaARDaQhaeQhqkui4qCe24=hxCLii6nqgCiGKoWhrWDXyDDpIzv+DD=',
+        'ssxmod_itna2':'Yq0xyD0D9D2DuGKQGHD8AQapDf225C7fQWInD8q6bhDGNKU35GaKBAOsx8OGUtwL13A2Grrq422Dxbhe5gCyrDgWWhLIQl2YgU3P6KmgXpo=Iq7bqVDuGfd0qeH2pOvU1sUYHj8cSpNiga=UhcHgYpNfoW=ZcBNb1nmxFna42pmFRDN5EaiY/7NnnmqaYwiF=3Ae=pWGcextYe8SrLaeYPiHSSrkiL=gGD0dt00USuQDsm4I+gIz6cI53xn78PGNhuWTb=45cqHryD=hdE4/7tAN0FNjcP6CFUYbraLaqfxftGB4OiS1r3KYHToH0k5KAKPmHmL594hEMKS8kbdY=O5KQoHe=0kwD2Npd3C3dpq3QDPD7jhxGcDG7YiDD===',
+        'UserName':'weixin_44628105',
+        'UserInfo':'7f099f1c57dc4e86ba3b84f7f1dd2e7b',
+        'UserToken':'7f099f1c57dc4e86ba3b84f7f1dd2e7b',
+        'UserNick':'weixin_44628105;'
     }
     db = Contraler_Database('dbfreeh')
     UPDATE_NOTE = "UPDATE `tb_article` SET `note` = '{}' WHERE (`id` = '{}');"
 
     def start_requests(self):
-        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`>8000 and `id`<9000) and (`note` is null or `note`="") and (`content`="" or `content` is null);'
+        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`>8678 and `id`<8682) and (`note` is null or `note`="") and (`content`="" or `content` is null);'
         # sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`=4129);'
         # sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`>1037 and `id`<2000;"
         self.db.cursor.execute(sql_origin)
@@ -107,7 +118,7 @@ class CSDNSpider(scrapy.Spider):
                         '请参看我', '点击关注', '作者|', '来源|', '戳进去领取', '加我微信', '关注我们', '未经允许', '原文链接', '点在看', '出品|', '编译|', '责编|',
                         '阅读原文', '更多精彩', '参考资料', '相关的资料链接戳这里', '作者/', '|知乎', '|博客', '交流群', '转发吧', '点“在看”', '文末福利', '免费获取', '文/',
                         '扫描上方二维码', '点击', '作者｜', '转自','校对｜', '微信群', '关注', '转载', '参见', '阅读本文', '关注', '往期精彩回顾', '原文地址：', '相关文档', '来源于',
-                        '转载于']
+                        '转载于', '联系我们', '开源地址']
         articleContentItem = items.ArticleContentItem()
         cleaner_paragraph = Cleaner_Paragraph()
         par_xpath_s = '//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]'
@@ -154,7 +165,7 @@ class CSDNSpider(scrapy.Spider):
                     if ('<img' in img.extract()):
                         src = img.xpath('./@src').extract_first()
                         if(src):
-                            content = content + "<img src='http://119.23.244.126/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
+                            content = content + "<img src='http://py.touxincha.cn/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
             articleContentItem['id_a'] = id_a
             articleContentItem['content'] = content
             yield articleContentItem
@@ -266,10 +277,11 @@ class CSDNSpider(scrapy.Spider):
                     pList.pop(pList.index(i))
                     break
             # 2 清除头图片
-            for i in pList[0:2]:
-                if(i.xpath('.//img') != []):
-                    pList.pop(pList.index(i))
-                    break
+            #   这一步骤选择性使用，针对vip文章暂时不使用看看效果
+            # for i in pList[0:2]:
+            #     if(i.xpath('.//img') != []):
+            #         pList.pop(pList.index(i))
+            #         break
 
             # 3 处理清除文章模块潜在的链接部分 如 整一段为 https:XXX.XXX.XX 没有中文的这种情况 以及 超链接文字的内容
             if(len(pList)>15):
