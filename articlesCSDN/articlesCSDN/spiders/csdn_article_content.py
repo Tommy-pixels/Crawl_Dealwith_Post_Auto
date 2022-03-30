@@ -68,7 +68,7 @@ class CSDNSpider(scrapy.Spider):
     UPDATE_NOTE = "UPDATE `tb_article` SET `note` = '{}' WHERE (`id` = '{}');"
 
     def start_requests(self):
-        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`>8678 and `id`<8682) and (`note` is null or `note`="") and (`content`="" or `content` is null);'
+        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`>=10000 and `id`<20000) and (`note` is null or `note`="") and (`content`="" or `content` is null);'
         # sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`=4129);'
         # sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`>1037 and `id`<2000;"
         self.db.cursor.execute(sql_origin)
@@ -103,7 +103,6 @@ class CSDNSpider(scrapy.Spider):
         try:
             # 对于404页面的处理
             div_404 = response.xpath('//div[@class="new_404"]')
-            print(id_a, ' 页面无效')
             if (div_404):
                 self.db.cursor.execute(self.UPDATE_NOTE.format('页面无效', id_a))
                 print(id_a, ' 页面无效')
@@ -118,7 +117,8 @@ class CSDNSpider(scrapy.Spider):
                         '请参看我', '点击关注', '作者|', '来源|', '戳进去领取', '加我微信', '关注我们', '未经允许', '原文链接', '点在看', '出品|', '编译|', '责编|',
                         '阅读原文', '更多精彩', '参考资料', '相关的资料链接戳这里', '作者/', '|知乎', '|博客', '交流群', '转发吧', '点“在看”', '文末福利', '免费获取', '文/',
                         '扫描上方二维码', '点击', '作者｜', '转自','校对｜', '微信群', '关注', '转载', '参见', '阅读本文', '关注', '往期精彩回顾', '原文地址：', '相关文档', '来源于',
-                        '转载于', '联系我们', '开源地址']
+                        '转载于', '联系我们', '开源地址', '侵权', '外链图片转存失败','网站：', '参阅', '制定人：', '摘要：', '请不要付费', '具体详看：', '引言', '美图', '简介', '介绍',
+                        '概述', '简介：', '参考：', '博客园', '开发者社区', '上一篇：', '声明：', '本文仅', '备注：', '下一篇']
         articleContentItem = items.ArticleContentItem()
         cleaner_paragraph = Cleaner_Paragraph()
         par_xpath_s = '//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]'
@@ -133,7 +133,8 @@ class CSDNSpider(scrapy.Spider):
             articleContentItem['id_a'] = id_a
             articleContentItem['content'] = content
             yield articleContentItem
-        elif(len(special)>2 and '转载于' not in ''.join(special) and 'class="postText"' not in pList[0].extract()):
+        elif(4>len(special)>2 and '转载于' not in ''.join(special) and 'class="postText"' not in pList[0].extract()):
+            # 【特殊情况】针对子节点都为br的情况但是又有文本内容
             content = ''
             for p in special:
                 c = cleaner_paragraph.integratedOp(p)
@@ -165,7 +166,7 @@ class CSDNSpider(scrapy.Spider):
                     if ('<img' in img.extract()):
                         src = img.xpath('./@src').extract_first()
                         if(src):
-                            content = content + "<img src='http://py.touxincha.cn/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
+                            content = content + "<img src='https://py.touxincha.cn/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
             articleContentItem['id_a'] = id_a
             articleContentItem['content'] = content
             yield articleContentItem
@@ -287,7 +288,7 @@ class CSDNSpider(scrapy.Spider):
             if(len(pList)>15):
                 for i in pList[-3:]:
                     c = i.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '').replace('\xa0','').replace('\r','').replace('\n','').replace('\t','')
-                    if(len(c)!=0 and _str_check(c)):
+                    if('<code' not in i.extract() and not i.extract().startswith('<pre') and len(c)!=0 and _str_check(c)):
                         pList.pop(pList.index(i))
 
             # 4 清目录
@@ -295,14 +296,18 @@ class CSDNSpider(scrapy.Spider):
                 if (i.xpath('./a') and 'href="#' in i.extract() or  '<hr id="hr-toc"' in i.extract()):
                     pList.pop(pList.index(i))
 
+            print(len(pList))
             # 5 内容提取
             for p in pList:
                 c = p.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '').replace('\xa0','').replace('\r','').replace('\n','').replace('\t','')
                 # 指定内容才筛选链接
-                if((0<len(c)<80 and _str_check(c)) or 0<len(c)<=2 or (len(c)==0 and p.xpath('.//img') == []) or (len(c.replace('-',''))==0 and p.xpath('.//img') == [])):
+                if((0<len(c)<80 and _str_check(c)) or 0<len(c)<=2 or (len(c)==0 and p.xpath('.//img') == [] and (p.xpath('.//code')==[] and not p.extract().startswith('<pre'))) or (len(c.replace('-',''))==0 and p.xpath('.//img') == [] and (p.xpath('.//code')==[] and not p.extract().startswith('<pre')))):
+                    print('----------', p)
                     continue
                 if ('版权说明' in c or '下面二维码' in c or '可关注微信公众号' in c or '邮箱地址' in c or '请关注公众号' in c or '相关系列：' in c
-                    or 'END' in c or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6) or '往期推荐' in c or '相关链接'in c):
+                    or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6) or '往期推荐' in c or '相关链接'in c):
+                    break
+                if('END' in c and not p.extract().startswith('<pre')):
                     break
                 check = False
                 for i_continue in self.lis_continue:
@@ -310,10 +315,16 @@ class CSDNSpider(scrapy.Spider):
                         check = True
                         break
                 if(check):
+                    print('-=======', p)
                     continue
 
                 if(c != '' and p.extract().startswith('<pre')):
-                    content = content + "<code>" + p.xpath('string(.)').extract_first() + "</code>"
+                    if('<' in p.xpath('string(.)').extract_first() and '>' in p.xpath('string(.)').extract_first()):
+                        # 处理一下html标签
+                        temp = p.xpath('string(.)').extract_first().replace('<','&lt;').replace('>','&gt;')
+                        content = content + "<code>" + temp + "</code>"
+                    else:
+                        content = content + "<code>" + p.xpath('string(.)').extract_first() + "</code>"
                 elif(c != '' and p.extract().startswith('<table')):
                     table = p.xpath('./tbody').extract()
                     if(type(table)==list):
@@ -331,7 +342,7 @@ class CSDNSpider(scrapy.Spider):
                     for img in p.xpath(".//img"):
                         src = img.xpath('./@src').extract_first()
                         if(src):
-                            content = content + "<img src='http://119.23.244.126/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
+                            content = content + "<img src='https://py.touxincha.cn/get_img?img_url=" + img.xpath('./@src').extract_first() + "' />"
             articleContentItem['id_a'] = id_a
             articleContentItem['content'] = content
             yield articleContentItem
