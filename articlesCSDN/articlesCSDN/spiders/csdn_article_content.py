@@ -68,7 +68,7 @@ class CSDNSpider(scrapy.Spider):
     UPDATE_NOTE = "UPDATE `tb_article` SET `note` = '{}' WHERE (`id` = '{}');"
 
     def start_requests(self):
-        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`>=10000 and `id`<20000) and (`note` is null or `note`="") and (`content`="" or `content` is null);'
+        sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`>=0 and `id`<10900) and (`note` is null or `note`="") and (`content`="" or `content` is null);'
         # sql_origin = 'SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE (`id`=4129);'
         # sql_ = "SELECT `id`,`ori_url`,`title` FROM `dbfreeh`.`tb_article` WHERE `content`='' AND `note` is Null and `id`>1037 and `id`<2000;"
         self.db.cursor.execute(sql_origin)
@@ -118,7 +118,8 @@ class CSDNSpider(scrapy.Spider):
                         '阅读原文', '更多精彩', '参考资料', '相关的资料链接戳这里', '作者/', '|知乎', '|博客', '交流群', '转发吧', '点“在看”', '文末福利', '免费获取', '文/',
                         '扫描上方二维码', '点击', '作者｜', '转自','校对｜', '微信群', '关注', '转载', '参见', '阅读本文', '关注', '往期精彩回顾', '原文地址：', '相关文档', '来源于',
                         '转载于', '联系我们', '开源地址', '侵权', '外链图片转存失败','网站：', '参阅', '制定人：', '摘要：', '请不要付费', '具体详看：', '引言', '美图', '简介', '介绍',
-                        '概述', '简介：', '参考：', '博客园', '开发者社区', '上一篇：', '声明：', '本文仅', '备注：', '下一篇']
+                        '概述', '简介：', '参考：', '博客园', '开发者社区', '上一篇：', '声明：', '本文仅', '备注：', '下一篇', '下一章', '参考', '评论留言','CSDN博客','点赞', '收藏',
+                        '申明：', '该文章', '点个赞', '对大家', '希望','序言：','背景', 'CSDN下载', '仅供参考', '联系删除', '高清中文版', '关联阅读']
         articleContentItem = items.ArticleContentItem()
         cleaner_paragraph = Cleaner_Paragraph()
         par_xpath_s = '//div[@class="blog-content-box"]/article/div[@id="article_content"]/div[@id="content_views"]'
@@ -301,8 +302,7 @@ class CSDNSpider(scrapy.Spider):
             for p in pList:
                 c = p.xpath('string(.)').extract_first().replace('\u3000', '').replace(' ','').replace('　', '').replace('\xa0','').replace('\r','').replace('\n','').replace('\t','')
                 # 指定内容才筛选链接
-                if((0<len(c)<80 and _str_check(c)) or 0<len(c)<=2 or (len(c)==0 and p.xpath('.//img') == [] and (p.xpath('.//code')==[] and not p.extract().startswith('<pre'))) or (len(c.replace('-',''))==0 and p.xpath('.//img') == [] and (p.xpath('.//code')==[] and not p.extract().startswith('<pre')))):
-                    print('----------', p)
+                if((0<len(c)<80 and _str_check(c) and (p.xpath('.//code')==[] and not p.extract().startswith('<pre'))) or 0<len(c)<=2 or (len(c)==0 and p.xpath('.//img') == [] and (p.xpath('.//code')==[] and not p.extract().startswith('<pre'))) or (len(c.replace('-',''))==0 and p.xpath('.//img') == [] and (p.xpath('.//code')==[] and not p.extract().startswith('<pre')))):
                     continue
                 if ('版权说明' in c or '下面二维码' in c or '可关注微信公众号' in c or '邮箱地址' in c or '请关注公众号' in c or '相关系列：' in c
                     or '推荐阅读：' in c or '加微信' in c or '扫码下面二维码' in c or ('参考资料' in c and len(c)<6) or '往期推荐' in c or '相关链接'in c):
