@@ -134,7 +134,7 @@ class CSDNSpider(scrapy.Spider):
             articleContentItem['id_a'] = id_a
             articleContentItem['content'] = content
             yield articleContentItem
-        elif(4>len(special)>2 and '转载于' not in ''.join(special) and 'class="postText"' not in pList[0].extract()):
+        elif(len(special)==2 and '转载于' not in ''.join(special) and 'class="postText"' not in pList[0].extract()):
             # 【特殊情况】针对子节点都为br的情况但是又有文本内容
             content = ''
             for p in special:
